@@ -1,0 +1,5 @@
+
+dotnet new classlib -n ApiHelper -o ApiHelper
+
+dotnet sln add .\VeggieBattleBackend\ApiHelper\ApiHelper.cspro
+
