@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-
+using System.Drawing;
 
 namespace ApiHelper.Controllers;
 
@@ -17,13 +17,14 @@ public class VeggieImgController : ControllerBase
         _logger = logger;
     }
 
+    [Route("{veggieName}")]
     [HttpGet(Name = "GetVeggieImg")]
-    public async Task<String> Get() // <StatModel>
+    public async Task<MemoryStream> Get(string veggieName) // <StatModel>
     {
         ApiClientHelper.InitializeClient();
-        var stats = await Img.LoadAIGeneratedImg("cartoon apple");
+        var img = await Img.LoadAIGeneratedImg(veggieName);
 
-        return stats;
+        return img;
     }
     
 }
