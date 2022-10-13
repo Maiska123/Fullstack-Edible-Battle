@@ -23,5 +23,27 @@ public class VeggieStatsController : ControllerBase
         var stats = await Stat.LoadStats();
         return stats;
     }
+
+    [Route("{veggieId}")]
+    [HttpGet(Name = "GetVeggieStatsById")]
+    public async Task<WarriorStatModel> GetStatsById(int veggieId) // <StatModel>
+    {
+        ApiClientHelper.InitializeClient();
+        var stats = await Stat.LoadStatsById(veggieId);
+        return new WarriorStatModel(veggieId, stats);
+    }
+
+    [Route("createwarrior/random")]
+    [HttpGet(Name = "CreateWarriorStatsForVeggie")]
+    public async Task<WarriorStatModel> CreateWarriorStats() // <StatModel>
+    {
+        Random random = new Random();
+        var id = random.Next(1,4000);
+
+        ApiClientHelper.InitializeClient();
+        var stats = await Stat.LoadStatsById(id);
+        
+        return new WarriorStatModel(id, stats);
+    }
     
 }
