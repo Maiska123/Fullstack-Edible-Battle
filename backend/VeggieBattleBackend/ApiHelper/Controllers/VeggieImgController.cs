@@ -2,29 +2,64 @@ using Microsoft.AspNetCore.Mvc;
 using System.Drawing;
 
 namespace ApiHelper.Controllers;
+using ApiHelper.Services;
 
+using ApiHelper;
 [ApiController]
 [Route("[controller]")]
 public class VeggieImgController : ControllerBase
 {
 
-    private static readonly ImgProcessor Img = new ImgProcessor();
-
     private readonly ILogger<VeggieImgController> _logger;
+    private readonly IVeggieCacheService _cacheService;
+    private readonly IImgProcessorService _imgProcessor;
 
-    public VeggieImgController(ILogger<VeggieImgController> logger)
+    public VeggieImgController(
+        ILogger<VeggieImgController> logger,
+        IVeggieCacheService service,
+        IImgProcessorService imgProcessor)
     {
         _logger = logger;
+        _cacheService = service;
+        _imgProcessor = imgProcessor;
     }
 
     [Route("{veggieName}")]
     [HttpGet(Name = "GetVeggieImg")]
-    public async Task<MemoryStream> Get(string veggieName) // <StatModel>
+    public Task<System.IO.Stream> Get(string veggieName) // <StatModel>
     {
+        if (_cacheService.veggieExists(veggieName)) {
+            return _imgProcessor.getPreviousImg(veggieName);
+        }
+        _imgProcessor.newCounter(veggieName);
+
+        // Store array of veggie names and give veggie and 1 from 4 available slots
+
         ApiClientHelper.InitializeClient();
-        var img = await Img.LoadAIGeneratedImg(veggieName);
+        var img = _imgProcessor.LoadAIGeneratedImg(veggieName);
 
         return img;
+    }
+
+    [Route("utils/waiting/counter/{name}")]
+    [HttpGet(Name = "GetVeggieImgWaitingCounterValue")]
+    public OkObjectResult GetWaitingCounter(string name)
+    {
+        return Ok(_imgProcessor.getCountable(name));
+    }
+
+    [Route("utils/counter/{name}")]
+    [HttpGet(Name = "GetVeggieImgCounterValue")]
+    public OkObjectResult GetCounter(string name)
+    {
+        return Ok(_cacheService.getUsageCountByName(name));
+    }
+
+    [Route("utils/getall")]
+    [HttpGet(Name = "GetAllVeggies")]
+    public OkObjectResult GetVeggies()
+    {
+        return Ok(_cacheService.GetAllVeggiesAsString().Result);
     }
     
 }
