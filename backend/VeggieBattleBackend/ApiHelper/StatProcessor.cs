@@ -24,4 +24,25 @@ public class StatProcessor
             }
         }
     }
+
+    public async Task<StatModel> LoadStatsById(int id)
+    {
+        string url = $"https://fineli.fi/fineli/api/v1/foods/{id}";
+        Console.WriteLine("url");
+        Console.WriteLine(url);
+
+        using(HttpResponseMessage response = await ApiClientHelper.ApiClient.GetAsync(url))
+        {
+            if(response.IsSuccessStatusCode)
+            {
+                StatModel stat = await response.Content.ReadFromJsonAsync<StatModel>();
+
+                return stat;
+            }
+            else
+            {
+                throw new Exception(response.ReasonPhrase);
+            }
+        }
+    }
 }
