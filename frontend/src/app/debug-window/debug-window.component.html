@@ -10,28 +10,28 @@
 >
 
 
-<p>debug-window</p>
+<p class="non-draggable">debug-window</p>
 
 <table class="tg">
   <thead>
     <tr>
-      <th class="tg-0lax">Name</th>
-      <th class="tg-0lax">Value</th>
+      <th class="tg-0lax non-draggable">Name</th>
+      <th class="tg-0lax non-draggable">Value</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let item of $Observables">
-      <td class="tg-0lax">{{ item.name }}</td>
-      <td class="tg-0lax">{{ item.data | date:'mm:ss'  }}</td>
+      <td class="tg-0lax non-draggable">{{ item.name }}</td>
+      <td class="tg-0lax non-draggable">{{ item.data | date:'mm:ss'  }}</td>
     </tr>
   </tbody>
 </table>
 
 
 <div class="resize-action" (mousedown)="setStatus($event, 1)"></div>
-<span>{{width | number:'1.0-0'}}px</span>
-<span>{{height | number:'1.0-0'}}px</span>
-<span>({{left}}, {{top}})</span>
+<span class="non-draggable">{{width | number:'1.0-0'}}px</span>
+<span class="non-draggable">{{height | number:'1.0-0'}}px</span>
+<span class="non-draggable">({{left}}, {{top}})</span>
 </div>
 
 
