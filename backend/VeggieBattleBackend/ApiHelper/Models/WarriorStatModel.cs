@@ -1,7 +1,6 @@
 namespace ApiHelper;
 
-public class WarriorStatModel
-{
+public class WarriorStatModel {
         /*
         100 grammaa sisältää:
 
@@ -11,6 +10,8 @@ public class WarriorStatModel
         Rasvat ei erikseen lisää mitään statsia, mutta enemmän rasvaa = enemmän energiaa = enemmän helaa
         Hiilihydraattien, rasvojen ja proteiinien yhteenlaskettu grammamäärä = Hitaus. (tai käänteisellä arvolla hyökkäysnopeus)
         */
+
+        public string Name { get; set; }
 
         public int Id { get; set; }
 
@@ -24,8 +25,8 @@ public class WarriorStatModel
 
         public double Luck { get; set; }
 
-        public WarriorStatModel(int id, StatModel Parameters)
-        {
+        public WarriorStatModel (int id, string name, StatModel Parameters) {
+                Name = name;
                 Id = id;
                 Hp = Parameters.EnergyKcal;
                 Attack = Parameters.Carbohydrate;

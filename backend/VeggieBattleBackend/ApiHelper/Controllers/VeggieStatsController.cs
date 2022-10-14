@@ -1,49 +1,50 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace ApiHelper.Controllers;
 
-[ApiController]
-[Route("[controller]")]
-public class VeggieStatsController : ControllerBase
-{
+using Microsoft.AspNetCore.Mvc;
 
-    private static readonly StatProcessor Stat = new StatProcessor();
+[ApiController]
+[Route ("[controller]")]
+public class VeggieStatsController : ControllerBase {
+
+    private static readonly StatProcessor Stat = new StatProcessor ();
 
     private readonly ILogger<VeggieStatsController> _logger;
 
-    public VeggieStatsController(ILogger<VeggieStatsController> logger)
-    {
+    public VeggieStatsController (ILogger<VeggieStatsController> logger) {
         _logger = logger;
     }
 
-    [HttpGet(Name = "GetVeggieStats")]
-    public async Task<StatModel> Get() // <StatModel>
+    [HttpGet ("GetVeggieStats")]
+    public async Task<StatModel> Get () // <StatModel>
     {
-        ApiClientHelper.InitializeClient();
-        var stats = await Stat.LoadStats();
+        ApiClientHelper.InitializeClient ();
+        var stats = await Stat.LoadStats ();
         return stats;
     }
 
-    [Route("{veggieId}")]
-    [HttpGet(Name = "GetVeggieStatsById")]
-    public async Task<WarriorStatModel> GetStatsById(int veggieId) // <StatModel>
+    [HttpGet ("{veggieId}")]
+    public async Task<WarriorStatModel> GetStatsById (int veggieId) // <StatModel>
     {
-        ApiClientHelper.InitializeClient();
-        var stats = await Stat.LoadStatsById(veggieId);
-        return new WarriorStatModel(veggieId, stats);
+        ApiClientHelper.InitializeClient ();
+        var stats = await Stat.LoadStatsById (veggieId);
+        return new WarriorStatModel (veggieId, stats.Name.ENG, stats);
     }
 
-    [Route("createwarrior/random")]
-    [HttpGet(Name = "CreateWarriorStatsForVeggie")]
-    public async Task<WarriorStatModel> CreateWarriorStats() // <StatModel>
+    [HttpGet ("createwarrior/random")]
+    public async Task<WarriorStatModel> CreateWarriorStats () // <StatModel>
     {
-        Random random = new Random();
-        var id = random.Next(1,4000);
+        var id = new FinelliIdHelperModel ();
 
-        ApiClientHelper.InitializeClient();
-        var stats = await Stat.LoadStatsById(id);
-        
-        return new WarriorStatModel(id, stats);
+        ApiClientHelper.InitializeClient ();
+
+        var stats = await Stat.LoadStatsById (id.Id);
+
+        while (stats is null) {
+            id = new FinelliIdHelperModel ();
+            stats = await Stat.LoadStatsById (id.Id);
+        }
+
+        return new WarriorStatModel (id.Id, Stat.getRandomWarriorName (stats.Name.ENG, Stat.getWarriorCharm (stats)), stats);
     }
-    
+
 }
