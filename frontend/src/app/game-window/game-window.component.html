@@ -1,5 +1,24 @@
-<div id="parent">
-  <div id="child">
-    <p>game-window works!</p>
+<div style="display: inline-block; position: relative">
+  <div
+  [ngClass]="flickerOn ? 'animate-flicker' : 'opacity-zeroed'"
+    id="overlappingDiv"
+    style="
+      background-color: black;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 10;
+    "
+  ></div>
+
+  <canvas></canvas>
+
+  <div id="parent">
+    <div id="child">
+      <p>game-window works!</p>
+    </div>
   </div>
 </div>

@@ -8,11 +8,61 @@
   top: 0;
   left: 0;
   margin: 0;
-  width: 100vw;
-  height: 100vh;
 
   /* Center vertically and horizontally */
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+@keyframes flickerAnimation {
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+@-o-keyframes flickerAnimation{
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+@-moz-keyframes flickerAnimation{
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+@-webkit-keyframes flickerAnimation{
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+.animate-flicker {
+   -webkit-animation: flickerAnimation .5s infinite;
+   -moz-animation: flickerAnimation .5s infinite;
+   -o-animation: flickerAnimation .5s infinite;
+    animation: flickerAnimation .5s infinite;
+}
+
+.opacity-zeroed{
+  -webkit-animation: flickerAnimationEnd 2s alternate forwards;
+  -moz-animation: flickerAnimationEnd 2s alternate forwards;
+  -o-animation: flickerAnimationEnd 2s alternate forwards;
+   animation: flickerAnimationEnd 2s alternate forwards;
+}
+
+
+@keyframes flickerAnimationEnd {
+  0%   { opacity:1; }
+  100% { opacity:0; }
+}
+@-o-keyframes flickerAnimationEnd{
+  0%   { opacity:1; }
+  100% { opacity:0; }
+}
+@-moz-keyframes flickerAnimationEnd{
+  0%   { opacity:1; }
+  100% { opacity:0; }
+}
+@-webkit-keyframes flickerAnimationEnd{
+  0%   { opacity:1; }
+  100% { opacity:0; }
 }
