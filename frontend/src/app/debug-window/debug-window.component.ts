@@ -1,3 +1,5 @@
+import { GameContestantsService } from './../services/game-contestants.service';
+import { NameUrl } from './../services/game-image.service';
 import { GameStatsService, IDebugStat } from './../services/game-stats.service';
 import {
   Component,
@@ -7,6 +9,9 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
+import { finalize, Subscription, switchMap } from 'rxjs';
+import { PrettyPrintPipe } from '../utils/pipes/PrettyPrint.pipe';
+import { AudioService } from '../services/audio.service';
 
 export interface IDebugStatTemplate {
   name: string;
@@ -22,39 +27,115 @@ const enum Status {
 @Component({
   selector: 'app-debug-window',
   templateUrl: './debug-window.component.html',
-  styleUrls: ['./debug-window.component.scss'],
+  styleUrls: ['./debug-window.component.scss']
 })
 export class DebugWindowComponent implements OnInit {
   public $Observables: Array<IDebugStatTemplate> = [];
+
+  private subscriptions = new Subscription();
 
   item: IDebugStatTemplate = {
     name: '',
     data: undefined,
   };
 
+  itemArray: IDebugStatTemplate[] = [];
+
   time!: number;
 
-  ngOnInit() {}
+  public ngOnInit() : void {}
 
-  ngAfterViewInit() {
+  public ngAfterViewInit() : void {
     this.loadBox();
     this.loadContainer();
   }
 
-  constructor(private gameStatsService: GameStatsService) {
-    gameStatsService.clockData.subscribe((x) => {
-      this.item.name = x.name;
+  public ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
 
-      x.data.subscribe((y) => {
-        this.item.data = y;
-      });
-      this.$Observables[0] = this.item;
+  public initSubs(): void {
+    console.log('this.subscriptions')
+    this.subscriptions.unsubscribe();
+    this.subscriptions = new Subscription();
+    this.handleSubscriptions();
+    console.log(this.subscriptions)
+
+  }
+  public something() {
+    // this.loading = true;
+    // this.a2vService.getNetworkTemplate().pipe(
+
+    //   filter(response => !!response),
+    //   switchMap(resp => this.service.createImage(resp.link)),
+    //   finalize(() => this.loading = false)
+
+    // ).subscribe(resp => this.image = resp);
+
+  }
+
+  private handleSubscriptions(): void {
+    console.log('handleSubscriptions()');
+    this.gameStatsService.observables$.forEach(BehaviousSubject => {
+      let name: string;
+      this.subscriptions.add(
+          BehaviousSubject.pipe(
+            switchMap(resp => {
+                name = resp.name
+                return resp.data
+            }),finalize(() => console.log(`${name} of BehaviousSubject.pipe() --> valmis`)))
+          .subscribe(data => {
+            // console.log(data);
+            let index = this.itemArray.findIndex(z => z.name == name);
+            if (index > -1) this.itemArray[index].data = data
+            else this.itemArray.push({name: name, data: data});
+          })
+        )
     });
+  }
+
+  constructor(private gameStatsService: GameStatsService,
+              private statService: GameContestantsService,
+              private audioService: AudioService) {
+
+    this.statService.changes.subscribe((change: boolean) => {
+      this.initSubs()
+    })
+
+  }
+
+  public ItemTypeIs(item: IDebugStatTemplate): string  {
+    if (item.name === 'clock') {return 'date'};
+    if (typeof(item.data) == typeof(1)) return 'number';
+    if (typeof(item.data) == typeof('test')) return 'string';
+    if (typeof(item.data) == typeof({})) return 'object';
+    return 'none';
+  }
+
+  public stringify(item: any): string {
+    return JSON.stringify(item);
+  }
+
+  public playPauseAndNext(){
+    if (!this.audioService.bgMusicPlaying) {
+      this.audioService.toggleBgMusicPlaying();
+      this.audioService.skipForward();
+    }
+    else {
+      this.audioService.toggleBgMusicPlaying();
+    }
+
   }
 
   /**
    *
    *  EVERYTHING UNDERNEATH IS TO JUST HANDLE DEBUG BOX!!!
+   *
+   *
+   *
+   *
+   *
+   *
    */
   @Input('width')
   public width!: number;

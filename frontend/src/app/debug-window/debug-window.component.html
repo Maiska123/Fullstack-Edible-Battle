@@ -1,5 +1,7 @@
 
 
+
+<a [routerLink]="" (click)="playPauseAndNext()">MusicButton</a>
 <div #box class="resizable-draggable"
 [style.width.px]="width"
 [style.height.px]="height"
@@ -20,9 +22,18 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let item of $Observables">
+    <tr *ngFor="let item of itemArray; index as i">
+
       <td class="tg-0lax non-draggable">{{ item.name }}</td>
-      <td class="tg-0lax non-draggable">{{ item.data | date:'mm:ss'  }}</td>
+
+      <ng-container [ngSwitch]="ItemTypeIs(item)">
+        <td *ngSwitchCase="'date'"  class="tg-0lax non-draggable">{{ item.data | date:'mm:ss' }}</td>
+        <td *ngSwitchCase="'string'" class="tg-0lax non-draggable">{{ item.data }}</td>
+        <td *ngSwitchCase="'object'" class="tg-0lax non-draggable">{{ item.data | prettyprint }}</td>
+        <td *ngSwitchCase="'none'" class="tg-0lax non-draggable">{{ item.data.toString() }}</td>
+        <td *ngSwitchDefault class="tg-0lax non-draggable">{{ item.data.toString() }}</td>
+      </ng-container>
+
     </tr>
   </tbody>
 </table>

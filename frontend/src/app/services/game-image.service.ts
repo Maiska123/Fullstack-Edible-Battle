@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ConfigService } from './config.service';
@@ -58,9 +58,14 @@ export class GameImageService {
     return this.http.get<IAllContestantsImgs>(this.apiBaseUrl + this.serviceUrl + path);
   }
 
-  public generateImageWithName(veggieName: string): Observable<any> {
+  public generateImageWithName(veggieName: string): Observable<Blob> {
     const path = `/${veggieName}`
-    return this.http.get<any>(this.apiBaseUrl + this.serviceUrl + path);
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
+    return this.http.get<Blob>(this.apiBaseUrl + this.serviceUrl + path,
+      {headers: headers, responseType: 'blob' as 'json' });
   }
 
   public getImageUsageCounterByName(veggieName: string): Observable<number> {

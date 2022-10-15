@@ -1,68 +1,90 @@
-import { HttpClient } from '@angular/common/http';
+import { GameContestantsService, IContestantStats } from './game-contestants.service';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ConfigService } from './config.service';
 
 export interface IDebugStat {
   name: string;
-  data: Subject<any>;
+  data: BehaviorSubject<any>;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GameStatsService {
   private readonly apiBaseUrl: string = '';
 
-  private _observables$: Array<BehaviorSubject<IDebugStat>>= new Array();
+  get observables$(): Array<BehaviorSubject<IDebugStat>> {
+    return this._observables$;
+  }
 
-  get observables$(): Array<Observable<IDebugStat>> { return this._observables$ }
-
-  public Observables$!: BehaviorSubject<IDebugStat>[];
+  // public Observables$!: BehaviorSubject<IDebugStat>[];
   // BehaviorSubject<{ [k: string]: any }>
-  private _mySubj: Subject<IDebugStat> = new Subject<IDebugStat>();
-  public clockData: Observable<IDebugStat> = this._mySubj.asObservable();
 
-  public data: IDebugStat = { name: 'clock', data: this._mySubj }
+  // uusi subjecti - eli se data tarjottimella mitä ikinä halutaankaan
+  // private _mySubj: Subject<{ [k: string]: any }> = new Subject<{ [k: string]: any }>();
+  private _mySubj: BehaviorSubject<{ [k: string]: any }> = new BehaviorSubject<{[k: string]: any; }>({});
 
+  // Sitten luodaan se yksittäinen behaviourSubjekti jolle annetaan nimi ja se data joka juuri alustettiin
+  public clockData: BehaviorSubject<IDebugStat> =
+    new BehaviorSubject<IDebugStat>({ name: 'clock', data: this._mySubj });
+  // public data: IDebugStat = { name: 'clock', data: this._mySubj }
+
+  private _observables$: Array<BehaviorSubject<IDebugStat>> = new Array(
+    this.clockData
+  );
 
   private _id!: NodeJS.Timer;
   private _RndNr: number = 0;
   public asd = new BehaviorSubject<number>(this._RndNr);
   private startDate = new Date();
-  private endDate   = new Date();
+  private endDate = new Date();
   private seconds = (this.endDate.getTime() - this.startDate.getTime()) / 1000;
 
-  constructor(private http: HttpClient) {
+  constructor(private statsService: GameContestantsService) {
     this.apiBaseUrl = ConfigService.settings.apiUri;
 
-    let user = new BehaviorSubject<IDebugStat>(this.data);
-    this._observables$.push(user);
+    this._observables$[0].getValue().data.next(0);
+
+    // this._observables$.push(newSubject);
   }
 
   ngOnInit() {
-    console.table(this._observables$);
+    // console.table(this._observables$);
   }
-
 
   startSth(): void {
     if (!this._id) {
-      this._id = setInterval(
-        () => {
-          this.endDate = new Date();
-          this._RndNr = (this.endDate.getTime() - this.startDate.getTime());
-          this.asd.next(this._RndNr);
-          let stat: IDebugStat = {name: 'clock', data: this.asd}
-          this._mySubj.next(stat)
-        }, 1000);
+      console.log('STARTED CLOCK');
 
+      this._id = setInterval(() => {
+        this.endDate = new Date();
+        this._RndNr = this.endDate.getTime() - this.startDate.getTime();
+        this._observables$[0].getValue().data.next(this._RndNr);
+      }, 1000);
 
+      this.statsService.getRandomContestant()
+      .subscribe({
+        next: (randomOne: IContestantStats) => {
+        this._observables$
+          .push(new BehaviorSubject<IDebugStat>(
+            <IDebugStat>{name: 'Random Veggie', data: new BehaviorSubject(randomOne) }
+          ))
+
+          // console.table(this._observables$)
+
+        },error: (err: HttpErrorResponse) =>{
+          console.error(err.status,err);
+        },complete: () => {
+          this.statsService.changes.next(!this.statsService.changes.getValue());
+            // console.log('we got the stuff');
+        }
+      });
     }
   }
 
   stopSth(): void {
     clearInterval(this._id);
   }
-
-
 }

@@ -1,7 +1,9 @@
+import { DebugWindowComponent } from './../debug-window/debug-window.component';
+import { GameStatsService } from './game-stats.service';
 import { ConfigService } from './config.service';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http'
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 export interface IContestantStats {
   /**
@@ -30,9 +32,14 @@ export class GameContestantsService {
   private readonly apiBaseUrl: string = '';
   private readonly serviceUrl: string = '/VeggieStats';
 
-  constructor(private http: HttpClient) {
+  public changes: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  constructor(private http: HttpClient,
+              // private debugWindow: DebugWindowComponent
+              ) {
     this.apiBaseUrl = ConfigService.settings.apiUri;
   }
+
 
  /** VEGGIESTAT METHODS
   * Veggies are unique by their Id which correspods to their stats

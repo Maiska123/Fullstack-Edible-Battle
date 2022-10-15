@@ -27,9 +27,11 @@ public class VeggieImgController : ControllerBase {
     [Produces(System.Net.Mime.MediaTypeNames.Image.Jpeg)]
     public IActionResult GetVeggieImg (string veggieName)
     {
+        
         if (_cacheService.veggieExists (veggieName)) {
             return File((_imgProcessor.getPreviousImg (veggieName)).Result, MediaTypeNames.Image.Jpeg, $"{veggieName}.jpeg");
         }
+        Console.WriteLine("Started Creating a new Veggie");
         _imgProcessor.newCounter (veggieName);
 
         // Store array of veggie names and give veggie and 1 from 4 available slots
