@@ -37,7 +37,8 @@ public class VeggieCacheService : IVeggieCacheService {
     }
 
     public int getUsageCountByName (string name) {
-        return VeggieCache.GetVeggieByName (name).UseVeggie;
+        if (VeggieCache.VeggieExists (name)) return VeggieCache.GetVeggieByName (name).UseVeggie;
+        return -1;
     }
 
     public Task<string> GetAllVeggiesAsString () {

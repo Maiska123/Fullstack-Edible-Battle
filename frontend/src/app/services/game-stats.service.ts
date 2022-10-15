@@ -1,5 +1,7 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { ConfigService } from './config.service';
 
 export interface IDebugStat {
   name: string;
@@ -10,6 +12,7 @@ export interface IDebugStat {
   providedIn: 'root'
 })
 export class GameStatsService {
+  private readonly apiBaseUrl: string = '';
 
   private _observables$: Array<BehaviorSubject<IDebugStat>>= new Array();
 
@@ -22,13 +25,17 @@ export class GameStatsService {
 
   public data: IDebugStat = { name: 'clock', data: this._mySubj }
 
+
   private _id!: NodeJS.Timer;
-  private _RndNr!: number;
+  private _RndNr: number = 0;
+  public asd = new BehaviorSubject<number>(this._RndNr);
   private startDate = new Date();
   private endDate   = new Date();
   private seconds = (this.endDate.getTime() - this.startDate.getTime()) / 1000;
 
-  constructor() {
+  constructor(private http: HttpClient) {
+    this.apiBaseUrl = ConfigService.settings.apiUri;
+
     let user = new BehaviorSubject<IDebugStat>(this.data);
     this._observables$.push(user);
   }
@@ -42,13 +49,10 @@ export class GameStatsService {
     if (!this._id) {
       this._id = setInterval(
         () => {
-          // this._RndNr = Math.floor(Math.random() * 10000000 )/100000;
           this.endDate = new Date();
-          this._RndNr = (this.endDate.getTime() - this.startDate.getTime())
-
-          let asd = new BehaviorSubject<number>(this._RndNr);
-          let stat: IDebugStat = {name: 'clock', data: asd}
-
+          this._RndNr = (this.endDate.getTime() - this.startDate.getTime());
+          this.asd.next(this._RndNr);
+          let stat: IDebugStat = {name: 'clock', data: this.asd}
           this._mySubj.next(stat)
         }, 1000);
 
