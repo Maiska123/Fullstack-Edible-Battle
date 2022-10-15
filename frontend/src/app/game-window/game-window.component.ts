@@ -43,4 +43,9 @@ export class GameWindowComponent implements OnInit {
 
     console.log(this.c);
   }
+
+  public animateBattle() {
+    window.requestAnimationFrame(this.animateBattle)
+
+  }
 }
