@@ -2,6 +2,8 @@ namespace ApiHelper;
 
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.IO;
+using Newtonsoft.Json;
 
 public enum StatKeyWord {
     /*
@@ -33,16 +35,48 @@ public class StatProcessor {
     public async Task<StatModel> LoadStatsById (int id) {
         string url = $"https://fineli.fi/fineli/api/v1/foods/{id}";
 
-        using (HttpResponseMessage response = await ApiClientHelper.ApiClient.GetAsync (url)) {
-            if (response.IsSuccessStatusCode) {
-                StatModel stat = await response.Content.ReadFromJsonAsync<StatModel> ();
-                return stat;
-            } else {
-                // throw new Exception(response.ReasonPhrase);
-                return null;
+        try {
+            using (HttpResponseMessage response = await ApiClientHelper.ApiClient.GetAsync (url)) {
+
+                if (response.IsSuccessStatusCode) {
+                    StatModel stat = await response.Content.ReadFromJsonAsync<StatModel> ();
+                    return stat;
+                } else {
+                    return backupMethodFromFile();
+
+                    throw new Exception(response.ReasonPhrase);
+                }
             }
+        } catch (Exception ex) {
+            return backupMethodFromFile();
+            throw ex;
         }
     }
+    public StatModel backupMethodFromFile () {
+        Console.WriteLine("\nChanged to Backupmethod: used API possible down\n");
+        // Console.WriteLine(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "staticFiles/veggiestats.json"));
+        // Console.WriteLine(System.AppDomain.CurrentDomain.BaseDirectory);
+        String allStaticVeggies = (File.ReadAllText(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "staticFiles/veggiestats.json")));
+        var objects = JsonConvert.DeserializeObject<StatModel[]>(allStaticVeggies);
+        Random random = new Random ();
+        var newId = random.Next (0, objects.AsEnumerable().Count());
+
+        Console.WriteLine("Names");
+        Console.WriteLine(JsonConvert.SerializeObject(objects.ElementAt(newId)));
+        Console.WriteLine(JsonConvert.SerializeObject(objects.ElementAt(newId+1)));
+
+        while (objects.ElementAt(newId).Name.ENG is null) {
+            newId = random.Next (0, objects.AsEnumerable().Count());
+            Console.WriteLine(JsonConvert.SerializeObject(objects.ElementAt(newId)));
+            Console.WriteLine($"Names {newId}");
+
+        }
+
+
+        return objects.ElementAt(newId);
+    }
+
+
     public string getRandomWarriorName (string ingredient, StatKeyWord? extra) {
 
         string warriorName = "";

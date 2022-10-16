@@ -29,7 +29,11 @@ public class VeggieImgController : ControllerBase {
     {
         
         if (_cacheService.veggieExists (veggieName)) {
-            return File((_imgProcessor.getPreviousImg (veggieName)).Result, MediaTypeNames.Image.Jpeg, $"{veggieName}.jpeg");
+            if ((_imgProcessor.getPreviousImg (veggieName) is not null))
+            {
+                return File((_imgProcessor.getPreviousImg (veggieName)).Result, MediaTypeNames.Image.Jpeg, $"{veggieName}.jpeg");
+            }
+            return NotFound();
         }
         Console.WriteLine("Started Creating a new Veggie");
         _imgProcessor.newCounter (veggieName);
@@ -47,8 +51,9 @@ public class VeggieImgController : ControllerBase {
     }
 
     [HttpGet ("utils/waiting/counter/{name}")]
-    public OkObjectResult GetWaitingCounter (string name) {
-        return Ok (_imgProcessor.getCountable (name));
+    public IActionResult GetWaitingCounter (string name) {
+        var counter = _imgProcessor.getCountable (name);
+        return counter is not null ? Ok (counter) : NotFound();
     }
 
     [HttpGet ("utils/counter/{name}")]

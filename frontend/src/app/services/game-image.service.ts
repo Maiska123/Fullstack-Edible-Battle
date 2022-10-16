@@ -27,10 +27,11 @@ export interface IWaitingCounter {
   // public int CounterValue { get; set; }
   // public int CounterMax { get; set; }
   // public string? Message { get; set; }
-  CounterName: string; // name based on what AI is generating
-  CounterValue: number; // where we are now
-  CounterMax: number; // the 100% of work done
-  Message?: string; // optional information if we want to provide it
+  counterName: string; // name based on what AI is generating
+  counterValue: number; // where we are now
+  counterMax: number; // the 100% of work done
+  message?: string; // optional information if we want to provide it
+
 }
 
 @Injectable({
@@ -59,7 +60,7 @@ export class GameImageService {
   }
 
   public generateImageWithName(veggieName: string): Observable<Blob> {
-    const path = `/${veggieName}`
+    const path = `/${encodeURIComponent(veggieName)}`
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json'
@@ -69,12 +70,12 @@ export class GameImageService {
   }
 
   public getImageUsageCounterByName(veggieName: string): Observable<number> {
-    const path = `/utils/counter/${veggieName}`
+    const path = `/utils/counter/${encodeURIComponent(veggieName)}`
     return this.http.get<number>(this.apiBaseUrl + this.serviceUrl + path);
   }
 
   public getImageGenerationCounterByName(veggieName: string): Observable<IWaitingCounter> {
-    const path = `/utils/waiting/counter/${veggieName}`
+    const path = `/utils/waiting/counter/${encodeURIComponent(veggieName)}`
     return this.http.get<IWaitingCounter>(this.apiBaseUrl + this.serviceUrl + path);
   }
 

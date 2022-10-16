@@ -44,7 +44,7 @@ public class VeggieStatsController : ControllerBase {
             stats = await Stat.LoadStatsById (id.Id);
         }
 
-        return new WarriorStatModel (id.Id, Stat.getRandomWarriorName (stats.Name.ENG, Stat.getWarriorCharm (stats)), stats);
+        return new WarriorStatModel (id.Id, Stat.getRandomWarriorName ((stats.Name.ENG ?? stats.Name.FIN), Stat.getWarriorCharm (stats)), stats);
     }
 
 }
