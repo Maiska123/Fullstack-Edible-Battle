@@ -16,9 +16,10 @@
 
   <canvas></canvas>
 
-  <div id="parent">
-    <div id="child">
-      <p>game-window works!</p>
+  <div *ngIf="!warrior1Ready && this.clicked" id="parent">
+    <div id="child" class="abc">Loading Fierce Veggies...
+
+
     </div>
-  </div>
+  </div><div *ngIf="!warrior1Ready && this.clicked"  class="loader"></div>
 </div>
