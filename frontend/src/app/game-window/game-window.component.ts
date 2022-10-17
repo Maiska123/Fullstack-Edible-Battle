@@ -5,6 +5,7 @@ import { GameStatsService } from './../services/game-stats.service';
 import { Component, OnInit } from '@angular/core';
 import { switchMap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { VideoPlayerComponent } from '../video-player/video-player.component';
 
 export interface IWarriorSprite {
   img: ImageBitmap | null;
@@ -54,6 +55,7 @@ export class GameWindowComponent implements OnInit {
   warrior1Ready: boolean = false;
   warrior2Ready: boolean = false;
 
+  public algorythmsMan: boolean = false;
   public flickerOn: boolean = false;
 
   private timer!: NodeJS.Timer;
@@ -79,11 +81,25 @@ export class GameWindowComponent implements OnInit {
     if (this.c) {
       this.drawLobbyImgToCanvas();
 
-      this.addBattleStartClickHandler();
-
       console.log(this.c);
     }
   }
+
+   public wannaBeAlgoExpert() {
+
+    if(this.algorythmsMan) {
+      VideoPlayerComponent.powerSwitch();
+
+      setTimeout(() => {
+         this.algorythmsMan = false;
+
+      }, 2000);
+    }
+
+    this.algorythmsMan = true;
+
+
+   }
 
   public imageCounterClock(name: string, count: number): void {
     if (this.c){
@@ -202,73 +218,74 @@ export class GameWindowComponent implements OnInit {
     }
   }
 
-  public addBattleStartClickHandler() {
-    addEventListener('click', () => {
-      if (!this.clicked &&
+  public addBattleStartClickHandler(): void {
+
+    if (!this.clicked &&
+      this.gameStatsService.observables$.some(
+        (x) => x.getValue().name == 'Random Veggie'
+      )
+      ) {
+      this.audioService.toggleBgMusicPlaying();
+      console.log(this.audioService);
+
+      this.clicked = true;
+
+      if (
         this.gameStatsService.observables$.some(
           (x) => x.getValue().name == 'Random Veggie'
         )
-        ) {
-        this.audioService.toggleBgMusicPlaying();
+      ) {
+        this.gameStatsService.observables$
+          .find((x) => x.getValue().name == 'Random Veggie')
+          ?.getValue()
+          .data.asObservable()
+          .subscribe((Stats: IContestantStats) => {
+            /***************
+             *  We Start Creating Veggie
+             */
+            console.log('Contenstant');
+            console.log(Stats.name);
+            this.drawLoadingTopScreen(Stats.name)
 
-        this.clicked = true;
-
-        if (
-          this.gameStatsService.observables$.some(
-            (x) => x.getValue().name == 'Random Veggie'
-          )
-        ) {
-          this.gameStatsService.observables$
-            .find((x) => x.getValue().name == 'Random Veggie')
-            ?.getValue()
-            .data.asObservable()
-            .subscribe((Stats: IContestantStats) => {
-              /***************
-               *  We Start Creating Veggie
-               */
-              console.log('Contenstant');
-              console.log(Stats.name);
-              this.drawLoadingTopScreen(Stats.name)
-
-              this.imageService
-                .generateImageWithName(Stats.name)
-                .subscribe((image: Blob) => {
-                  console.log('Got Image!');
-                  createImageBitmap(image, 0, 0, 512, 512, {
-                    resizeWidth: 250,
-                    resizeHeight: 250,
+            this.imageService
+              .generateImageWithName(Stats.name)
+              .subscribe((image: Blob) => {
+                console.log('Got Image!');
+                createImageBitmap(image, 0, 0, 512, 512, {
+                  resizeWidth: 250,
+                  resizeHeight: 250,
+                })
+                  .then((imageBitmap: ImageBitmap) => {
+                    this.bitmapCache = imageBitmap;
                   })
-                    .then((imageBitmap: ImageBitmap) => {
-                      this.bitmapCache = imageBitmap;
-                    })
-                    .finally(() => {
-                      this.warrior1Ready = true;
-                      console.log('Drawing Image');
-                      if (this.c) {
-                        this.c.drawImage(this.bitmapCache, 200, 220);
-                      }
-                    });
-                });
-            });
-        }
-
-        setTimeout(() => {
-          // music has delay
-          this.flickerOn = true;
-          const image = new Image();
-          image.src = '../../assets/battleBackground.png';
-
-          image.onload = () => {
-            setTimeout(() => {
-              if (this.c) this.c.drawImage(image, 0, 0);
-            }, 1000);
-            setTimeout(() => {
-              this.flickerOn = false;
-            }, 3000);
-          };
-        }, 2000);
+                  .finally(() => {
+                    this.warrior1Ready = true;
+                    console.log('Drawing Image');
+                    if (this.c) {
+                      this.c.drawImage(this.bitmapCache, 200, 220);
+                    }
+                  });
+              });
+          });
       }
-    });
+
+      setTimeout(() => {
+        // music has delay
+        this.flickerOn = true;
+        const image = new Image();
+        image.src = '../../assets/battleBackground.png';
+
+        image.onload = () => {
+          setTimeout(() => {
+            if (this.c) this.c.drawImage(image, 0, 0);
+          }, 1000);
+          setTimeout(() => {
+            this.flickerOn = false;
+          }, 3000);
+        };
+      }, 2000);
+    }
+
   }
 
   public animateBattle() {
