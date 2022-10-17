@@ -8,13 +8,15 @@ import { GameWindowComponent } from './game-window/game-window.component';
 import { DebugWindowComponent } from './debug-window/debug-window.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HttpClientModule } from '@angular/common/http';
+import { VideoPlayerComponent } from './video-player/video-player.component';
 
 @NgModule({
-  declarations: [
+  declarations: [	
     AppComponent,
       GameWindowComponent,
       DebugWindowComponent,
-      PrettyPrintPipe
+      PrettyPrintPipe,
+      VideoPlayerComponent
    ],
   imports: [
     BrowserModule,
