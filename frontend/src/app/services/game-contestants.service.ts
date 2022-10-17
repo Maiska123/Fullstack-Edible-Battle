@@ -31,6 +31,7 @@ export interface IContestantStats {
 export class GameContestantsService {
   private readonly apiBaseUrl: string = '';
   private readonly serviceUrl: string = '/VeggieStats';
+  private offline: boolean = true;
 
   public changes: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
@@ -38,6 +39,7 @@ export class GameContestantsService {
               // private debugWindow: DebugWindowComponent
               ) {
     this.apiBaseUrl = ConfigService.settings.apiUri;
+    this.offline = ConfigService.settings.offline;
   }
 
 
@@ -50,12 +52,20 @@ export class GameContestantsService {
   */
   public getRandomContestant(): Observable<IContestantStats> {
     const path = `/createwarrior/random`
-    return this.http.get<IContestantStats>(this.apiBaseUrl + this.serviceUrl + path);
+    const options = {
+      params: {
+        offline: this.offline,
+      }};
+    return this.http.get<IContestantStats>(this.apiBaseUrl + this.serviceUrl + path, options);
   }
 
   public getContestantStatsById(veggieId: number): Observable<IContestantStats> {
     const path = `/${veggieId}`
-    return this.http.get<IContestantStats>(this.apiBaseUrl + this.serviceUrl + path);
+    const options = {
+      params: {
+        offline: this.offline,
+      }};
+    return this.http.get<IContestantStats>(this.apiBaseUrl + this.serviceUrl + path, options);
   }
 
 }

@@ -3,6 +3,7 @@ import { environment } from 'src/environments/environment';
 
 export interface IAppConfig {
   apiUri: string;
+  offline: boolean;
 }
 
 @Injectable({

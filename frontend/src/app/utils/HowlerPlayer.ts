@@ -77,7 +77,7 @@ export class HowlerPlayer {
   public stop(): void {
     let sound = this._sounds[this._index].howl;
     if (sound) {
-      sound.fade(1, 0, 500);
+      sound.fade(1, 0, 100);
       sound.once('fade', () => {
         sound.stop();
         sound.volume(1);

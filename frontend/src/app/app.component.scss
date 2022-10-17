@@ -141,6 +141,18 @@
               0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
+.marquee{
+  pointer-events: none;
+  background-image: url(../assets/background_marquee.png);
+  position: fixed;
+  z-index: 9999999;
+  width: -webkit-fill-available;
+  height: -webkit-fill-available;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
 .box-container {
   position: absolute;
   width: 100vw;
@@ -149,6 +161,7 @@
   top: 50%;
   left: 50%;
   transform: translate3d(-50%, -50%, 0);
+  z-index: 2;
 
   span:first-of-type {
       position: absolute;

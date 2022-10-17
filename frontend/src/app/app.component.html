@@ -1,8 +1,9 @@
 
 <div id="fullscreen" [className]="isDebug ? 'fullscreen-debug' : 'fullscreen'">
+  <div class="marquee"></div>
+  <router-outlet></router-outlet>
   <div *ngIf="this.isDebugMiniview" class="box-container">  <!--class="example-box" cdkDrag-->
     <app-debug-window  cdkDrag [width]="300" [height]="150" [left]="100" [top]="10"></app-debug-window>
   </div>
 
-  <router-outlet></router-outlet>
 </div>
