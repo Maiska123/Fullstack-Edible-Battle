@@ -23,25 +23,25 @@ public class VeggieStatsController : ControllerBase {
     }
 
     [HttpGet ("{veggieId}")]
-    public async Task<WarriorStatModel> GetStatsById (int veggieId) // <StatModel>
+    public async Task<WarriorStatModel> GetStatsById (int veggieId, [FromQuery]bool offline) // <StatModel>
     {
         ApiClientHelper.InitializeClient ();
-        var stats = await Stat.LoadStatsById (veggieId);
+        var stats = await Stat.LoadStatsById (veggieId, offline);
         return new WarriorStatModel (veggieId, stats.Name.ENG, stats);
     }
 
     [HttpGet ("createwarrior/random")]
-    public async Task<WarriorStatModel> CreateWarriorStats () // <StatModel>
+    public async Task<WarriorStatModel> CreateWarriorStats ([FromQuery]bool offline) // <StatModel>
     {
         var id = new FinelliIdHelperModel ();
 
         ApiClientHelper.InitializeClient ();
 
-        var stats = await Stat.LoadStatsById (id.Id);
+        var stats = await Stat.LoadStatsById (id.Id, offline);
 
         while (stats is null) {
             id = new FinelliIdHelperModel ();
-            stats = await Stat.LoadStatsById (id.Id);
+            stats = await Stat.LoadStatsById (id.Id, offline);
         }
 
         return new WarriorStatModel (id.Id, Stat.getRandomWarriorName ((stats.Name.ENG ?? stats.Name.FIN), Stat.getWarriorCharm (stats)), stats);

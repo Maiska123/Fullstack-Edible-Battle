@@ -87,8 +87,10 @@ export class GameWindowComponent implements OnInit {
 
   public imageCounterClock(name: string, count: number): void {
     if (this.c){
-      if (Number(this.loadingbar.style.width) >= this.c.canvas.width) this.accumulator = 0;
-      else this.accumulator +=1;
+      if (this.loadingbar){
+        if (Number(this.loadingbar.style.width) >= this.c.canvas.width) this.accumulator = 0;
+        else this.accumulator +=1;
+      }
     }
 
     this.activateLoadingBar();

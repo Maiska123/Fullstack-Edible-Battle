@@ -1,3 +1,4 @@
 {
-  "apiUri": "https://localhost:7220"
+  "apiUri": "https://localhost:7220",
+  "offline": true
 }

@@ -3,7 +3,10 @@ namespace ApiHelper;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
-using Newtonsoft.Json;
+using Polly;
+using Polly.Extensions.Http;
+using Polly.CircuitBreaker;
+
 
 public enum StatKeyWord {
     /*
@@ -20,7 +23,15 @@ public enum StatKeyWord {
     LUCK = 4,
     FINALBOSS = 5
 }
-public class StatProcessor {
+public class StatProcessor 
+{
+    private readonly AsyncCircuitBreakerPolicy<HttpResponseMessage> _circuitBreaker =
+    Policy<HttpResponseMessage>
+        .Handle<HttpRequestException>()
+        .OrTransientHttpError()
+        .AdvancedCircuitBreakerAsync(0.5, TimeSpan.FromSeconds(10),10,TimeSpan.FromSeconds(15));
+
+
     public async Task<StatModel> LoadStats () {
         string url = "https://fineli.fi/fineli/api/v1/foods/1";
         using (HttpResponseMessage response = await ApiClientHelper.ApiClient.GetAsync (url)) {
@@ -32,48 +43,44 @@ public class StatProcessor {
             }
         }
     }
-    public async Task<StatModel> LoadStatsById (int id) {
+    public async Task<StatModel> LoadStatsById (int id, bool offline = false) {
         string url = $"https://fineli.fi/fineli/api/v1/foods/{id}";
 
+        if ((_circuitBreaker.CircuitState is CircuitState.Open or CircuitState.Isolated)
+        || offline)
+        {
+            return backupMethodFromFile();
+        }
         try {
-            using (HttpResponseMessage response = await ApiClientHelper.ApiClient.GetAsync (url)) {
+            HttpResponseMessage response = await _circuitBreaker.ExecuteAsync(() =>
+                ApiClientHelper.ApiClient.GetAsync (url));
 
-                if (response.IsSuccessStatusCode) {
-                    StatModel stat = await response.Content.ReadFromJsonAsync<StatModel> ();
-                    return stat;
-                } else {
-                    return backupMethodFromFile();
+            if (response.IsSuccessStatusCode) {
+                StatModel stat = await response.Content.ReadFromJsonAsync<StatModel> ();
+                return stat;
+            } else {
+                return backupMethodFromFile();
 
-                    throw new Exception(response.ReasonPhrase);
-                }
+                throw new Exception(response.ReasonPhrase);
             }
+            
         } catch (Exception ex) {
             return backupMethodFromFile();
+
             throw ex;
         }
     }
-    public StatModel backupMethodFromFile () {
-        Console.WriteLine("\nChanged to Backupmethod: used API possible down\n");
-        // Console.WriteLine(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "staticFiles/veggiestats.json"));
-        // Console.WriteLine(System.AppDomain.CurrentDomain.BaseDirectory);
+    public StatModel backupMethodFromFile (bool offline = false) {
+        Console.WriteLine( offline ?
+                "\nChanged to Backupmethod: using offline storage\n"
+            :   "\nChanged to Backupmethod: used API for Stats possible down\n"
+            );
+        
         String allStaticVeggies = (File.ReadAllText(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "staticFiles/veggiestats.json")));
-        var objects = JsonConvert.DeserializeObject<StatModel[]>(allStaticVeggies);
-        Random random = new Random ();
-        var newId = random.Next (0, objects.AsEnumerable().Count());
-
-        Console.WriteLine("Names");
-        Console.WriteLine(JsonConvert.SerializeObject(objects.ElementAt(newId)));
-        Console.WriteLine(JsonConvert.SerializeObject(objects.ElementAt(newId+1)));
-
-        while (objects.ElementAt(newId).Name.ENG is null) {
-            newId = random.Next (0, objects.AsEnumerable().Count());
-            Console.WriteLine(JsonConvert.SerializeObject(objects.ElementAt(newId)));
-            Console.WriteLine($"Names {newId}");
-
-        }
-
-
-        return objects.ElementAt(newId);
+        StatModel[] veggies = System.Text.Json.JsonSerializer.Deserialize<StatModel[]>(allStaticVeggies); 
+        Random random = new();
+        var newId = random.Next (0, veggies.Count());
+        return veggies.ElementAt(newId);
     }
 
 
@@ -128,10 +135,10 @@ public class StatProcessor {
             stats.SaturatedFat > 50.00
         ) return StatKeyWord.FINALBOSS;
         if (stats.EnergyKcal > 200.00) return StatKeyWord.HP;
-        if (stats.Carbohydrate > 70.00) return StatKeyWord.ATTACK;
-        if (stats.Protein > 70.00) return StatKeyWord.DEFENCE;
+        if (stats.Carbohydrate > 50.00) return StatKeyWord.ATTACK;
+        if (stats.Protein > 50.00) return StatKeyWord.DEFENCE;
         if ((stats.Carbohydrate + stats.Protein + stats.Fat) > 70.00) return StatKeyWord.SPEED;
-        if (stats.SaturatedFat > 70.00) return StatKeyWord.LUCK;
+        if (stats.SaturatedFat > 50.00) return StatKeyWord.LUCK;
 
         return null;
     }
