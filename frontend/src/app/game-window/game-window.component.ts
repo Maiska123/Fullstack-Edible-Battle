@@ -24,6 +24,12 @@ export enum imagePos{
   fourth
 }
 
+export enum QueueStatus{
+  stopped,
+  started,
+  waitingForUser
+}
+
 export const imagePosDescription: {
   [key in imagePos]: number[];
 } = {
@@ -32,6 +38,23 @@ export const imagePosDescription: {
   [imagePos.third]: [0, 512, 512, 512],
   [imagePos.fourth]: [512, 512, 512, 512]
 };
+
+export const BattleStateDescription: {
+  [key in imagePos]: number[];
+} = {
+  [imagePos.first]: [0, 0, 512, 512],
+  [imagePos.second]: [512, 0, 512, 512],
+  [imagePos.third]: [0, 512, 512, 512],
+  [imagePos.fourth]: [512, 512, 512, 512]
+};
+
+
+export enum battleState{
+  warrior1Attacking,
+  warrior2Attacking,
+  dialogTextInput,
+  waitingForUser,
+}
 
 @Component({
   selector: 'app-game-window',
@@ -68,6 +91,9 @@ export class GameWindowComponent implements OnInit {
     currentframe: 0,
     totalframes: 0,
   };
+  warrior1Stats!: IContestantStats;
+  warrior2Stats!: IContestantStats;
+
   warrior1Name: string = '';
   warrior2Name: string = '';
 
@@ -91,6 +117,8 @@ export class GameWindowComponent implements OnInit {
   public textInputEnded: boolean = false;
   private dialogSubject: Subject<string> = new Subject<string>();
 
+  public battleQueueStatus: QueueStatus = QueueStatus.stopped;
+  public battleQueue: Array<battleState> = [];
 
 
   constructor(
@@ -184,9 +212,68 @@ public evolveMyVeggie(){
   }
 }
 
-advanceBattle() {
+public calculateAndAdvanceBattle(){
+
+  // lets calculate battle till the end
+  // we determine things and "steps" by the warrior stats
+
+
+
+  while(this.warrior1Stats.hp > 0 || this.warrior2Stats.hp > 0){
+    // now lets calculate things to happen
+
+  }
+
+
+  let gameState = this.battleQueue.shift();
+
+  if(gameState == battleState.dialogTextInput){
+
+  }
+  if(gameState == battleState.warrior1Attacking){
+
+  }
+  if(gameState == battleState.warrior2Attacking){
+
+  }
+  if(gameState == battleState.waitingForUser){
+
+  }
+
+
+
+
+  this.battleQueueStatus = QueueStatus.waitingForUser; // always ends at waiting for user
+}
+
+public startBattle(){
+  this.battleQueue.push(battleState.dialogTextInput);
+  this.calculateAndAdvanceBattle();
+
+}
+
+/**
+ * Advance Battle 1 step at a time
+ *  either started (going on its own)
+ * or stopped (in HALT state)
+ * or waiting for user (user clicks button to advance)
+ */
+public advanceBattle() {
+  if (this.battleQueueStatus == QueueStatus.stopped) {
   let word = 'You sure are '+ this.adjectivesToStart[(Math.floor(Math.random() * this.adjectivesToStart.length) + 1)] +' button clicker...'
   this.dialogTextInputEffect(word);
+  } else {
+    // take next value from this.battleQueue
+    if (this.warrior1Ready && this.warrior2Ready
+      && this.battleQueue.length == 0
+      && this.battleQueueStatus == QueueStatus.started) {
+      // battle begins
+      this.startBattle()
+    } else if (this.battleQueueStatus == QueueStatus.waitingForUser) {
+      // in battle
+      this.calculateAndAdvanceBattle()
+    }
+  }
 }
 
   public pushedButton(callbackName?: string){
@@ -408,6 +495,7 @@ advanceBattle() {
               /***************
                *  We Start Creating Veggie
                */
+              this.warrior1Stats = Stats;
               console.log('Contenstant');
               console.log(Stats.name);
               this.drawLoadingTopScreen(Stats.name)
