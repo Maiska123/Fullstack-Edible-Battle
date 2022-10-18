@@ -1,0 +1,41 @@
+.box {
+  z-index: 9;
+  border-radius: 2px;
+  padding: 8px;
+  font-family: monospace;
+  overflow: hidden;
+  width: 250px;
+  font-size: x-small;
+  left: 244px;
+  height: 28px;
+  top: 83px;
+  transform: scale(1.9);
+  position: absolute;
+  line-height: 16px;
+  margin: auto;
+  background: white;
+  border: 1px solid white;
+  box-shadow: 0 1px 0 1px black, inset 0 1px 0 1px black, 0 0 0 1px black,
+    inset 0 0 0 1px black;
+}
+.box > i {
+  width: 0;
+  top: 10px;
+  right: 10px;
+  height: 0;
+  position: absolute;
+  border: 5px solid transparent;
+  border-top-color: black;
+  margin-top: 23px;
+  animation: bounce 0.5s ease-in-out infinite alternate;
+  float: right;
+}
+
+@keyframes bounce {
+  from {
+    margin-top: 20px;
+  }
+  to {
+    margin-top: 23px;
+  }
+}

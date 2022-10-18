@@ -11,7 +11,7 @@ bgMusicPlayer!: HowlerPlayer;
 
 public viewDidLoad() {
   this.bgMusicPlayer = new HowlerPlayer([
-    'assets/ff7battle.mp3',
+    "assets/ff7battle.mp3",
     "assets/pokemonvswild.mp3",
     "assets/ff7battle.mp3",
     "assets/pokemongymbattle.mp3",
@@ -20,6 +20,22 @@ public viewDidLoad() {
 
 constructor() { }
 
+playTextSound(){
+  this.bgMusicPlayer.playTextSound();
+}
+
+bringTheBeatBack() {
+  this.bgMusicPlayer.bringTheBeatBack();
+}
+
+dimBGMusic() {
+  this.bgMusicPlayer.dimMusic();
+}
+
+
+public playButtonSound(down: boolean = true){
+  this.bgMusicPlayer.playButtonSound(down);
+}
 
 public toggleBgMusicPlaying(): void {
   if ( this.bgMusicPlaying )
