@@ -20,7 +20,7 @@ export interface IWarriorSprite {
 @Component({
   selector: 'app-game-window',
   templateUrl: './game-window.component.html',
-  styleUrls: ['./game-window.component.css'],
+  styleUrls: ['./game-window.component.scss'],
 })
 export class GameWindowComponent implements OnInit {
   canvas!: HTMLCanvasElement;
@@ -88,15 +88,43 @@ export class GameWindowComponent implements OnInit {
    public wannaBeAlgoExpert() {
 
     if(this.algorythmsMan) {
+      VideoPlayerComponent.videoShow = false;
+
       VideoPlayerComponent.powerSwitch();
 
       setTimeout(() => {
+
          this.algorythmsMan = false;
 
-      }, 2000);
+         document.getElementById('disabled-button1')?.removeAttribute('disabled')
+         document.getElementById('disabled-button2')?.removeAttribute('disabled')
+      }, 500);
     }
 
     this.algorythmsMan = true;
+
+    document.getElementById('disabled-button1')?.setAttribute('disabled','')
+    document.getElementById('disabled-button2')?.setAttribute('disabled','')
+
+
+    // element1!.addEventListener('mouseover', function() {
+    //   console.log('Event triggered');
+    // });
+
+    // element2!.addEventListener('mouseover', function() {
+    //   console.log('Event triggered');
+    // });
+
+    // var event = new MouseEvent('mouseover', {
+    //   'view': window,
+    //   'bubbles': false,
+    //   'cancelable': false
+    // });
+
+    // element1!.dispatchEvent(event);
+    // element2!.dispatchEvent(event);
+
+
 
 
    }
@@ -192,12 +220,12 @@ export class GameWindowComponent implements OnInit {
     this.canvas = <HTMLCanvasElement>document.querySelector('canvas');
     this.c = this.canvas.getContext('2d');
     this.canvas.width = 1024;
-    this.canvas.height = 576;
+    this.canvas.height = 600;
   }
 
   public drawLobbyImgToCanvas(): void {
     if (this.c) {
-      this.c.fillStyle = 'white';
+      this.c.fillStyle = 'black';
       this.c.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
       const image = new Image();
@@ -218,74 +246,75 @@ export class GameWindowComponent implements OnInit {
     }
   }
 
+
   public addBattleStartClickHandler(): void {
-
-    if (!this.clicked &&
-      this.gameStatsService.observables$.some(
-        (x) => x.getValue().name == 'Random Veggie'
-      )
-      ) {
-      this.audioService.toggleBgMusicPlaying();
-      console.log(this.audioService);
-
-      this.clicked = true;
-
-      if (
+    if (!this.algorythmsMan) {
+      if (!this.clicked &&
         this.gameStatsService.observables$.some(
           (x) => x.getValue().name == 'Random Veggie'
         )
-      ) {
-        this.gameStatsService.observables$
-          .find((x) => x.getValue().name == 'Random Veggie')
-          ?.getValue()
-          .data.asObservable()
-          .subscribe((Stats: IContestantStats) => {
-            /***************
-             *  We Start Creating Veggie
-             */
-            console.log('Contenstant');
-            console.log(Stats.name);
-            this.drawLoadingTopScreen(Stats.name)
+        ) {
+        this.audioService.toggleBgMusicPlaying();
+        console.log(this.audioService);
 
-            this.imageService
-              .generateImageWithName(Stats.name)
-              .subscribe((image: Blob) => {
-                console.log('Got Image!');
-                createImageBitmap(image, 0, 0, 512, 512, {
-                  resizeWidth: 250,
-                  resizeHeight: 250,
-                })
-                  .then((imageBitmap: ImageBitmap) => {
-                    this.bitmapCache = imageBitmap;
+        this.clicked = true;
+
+        if (
+          this.gameStatsService.observables$.some(
+            (x) => x.getValue().name == 'Random Veggie'
+          )
+        ) {
+          this.gameStatsService.observables$
+            .find((x) => x.getValue().name == 'Random Veggie')
+            ?.getValue()
+            .data.asObservable()
+            .subscribe((Stats: IContestantStats) => {
+              /***************
+               *  We Start Creating Veggie
+               */
+              console.log('Contenstant');
+              console.log(Stats.name);
+              this.drawLoadingTopScreen(Stats.name)
+
+              this.imageService
+                .generateImageWithName(Stats.name)
+                .subscribe((image: Blob) => {
+                  console.log('Got Image!');
+                  createImageBitmap(image, 0, 0, 512, 512, {
+                    resizeWidth: 250,
+                    resizeHeight: 250,
                   })
-                  .finally(() => {
-                    this.warrior1Ready = true;
-                    console.log('Drawing Image');
-                    if (this.c) {
-                      this.c.drawImage(this.bitmapCache, 200, 220);
-                    }
-                  });
-              });
-          });
+                    .then((imageBitmap: ImageBitmap) => {
+                      this.bitmapCache = imageBitmap;
+                    })
+                    .finally(() => {
+                      this.warrior1Ready = true;
+                      console.log('Drawing Image');
+                      if (this.c) {
+                        this.c.drawImage(this.bitmapCache, 200, 220);
+                      }
+                    });
+                });
+            });
+        }
+
+        setTimeout(() => {
+          // music has delay
+          this.flickerOn = true;
+          const image = new Image();
+          image.src = '../../assets/battleBackground.png';
+
+          image.onload = () => {
+            setTimeout(() => {
+              if (this.c) this.c.drawImage(image, 0, 0);
+            }, 1000);
+            setTimeout(() => {
+              this.flickerOn = false;
+            }, 3000);
+          };
+        }, 2000);
       }
-
-      setTimeout(() => {
-        // music has delay
-        this.flickerOn = true;
-        const image = new Image();
-        image.src = '../../assets/battleBackground.png';
-
-        image.onload = () => {
-          setTimeout(() => {
-            if (this.c) this.c.drawImage(image, 0, 0);
-          }, 1000);
-          setTimeout(() => {
-            this.flickerOn = false;
-          }, 3000);
-        };
-      }, 2000);
     }
-
   }
 
   public animateBattle() {

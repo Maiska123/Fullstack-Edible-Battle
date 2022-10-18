@@ -1,51 +1,51 @@
-
-
-
 <a [routerLink]="" (click)="playPauseAndNext()">MusicButton</a>
-<div #box class="resizable-draggable" style="background-color: aliceblue;"
-[style.width.px]="width"
-[style.height.px]="height"
-[style.transform]="'translate3d('+ left + 'px,' + top + 'px,' + '0px)'"
-[class.active]="status === 1 || status === 2"
-(mousedown)="setStatus($event, 2)"
-(window:mouseup)="setStatus($event, 0)"
+<div
+  #box
+  class="resizable-draggable"
+  style="background-color: aliceblue"
+  [style.width.px]="width"
+  [style.height.px]="height"
+  [style.transform]="'translate3d(' + left + 'px,' + top + 'px,' + '0px)'"
+  [class.active]="status === 1 || status === 2"
+  (mousedown)="setStatus($event, 2)"
+  (window:mouseup)="setStatus($event, 0)"
 >
+  <p class="non-draggable">debug-window</p>
 
+  <table class="tg">
+    <thead>
+      <tr>
+        <th class="tg-0lax non-draggable">Name</th>
+        <th class="tg-0lax non-draggable">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of itemArray; index as i">
+        <td class="tg-0lax non-draggable">{{ item.name }}</td>
 
-<p class="non-draggable">debug-window</p>
+        <ng-container [ngSwitch]="ItemTypeIs(item)">
+          <td *ngSwitchCase="'date'" class="tg-0lax non-draggable">
+            {{ item.data | date: "mm:ss" }}
+          </td>
+          <td *ngSwitchCase="'string'" class="tg-0lax non-draggable">
+            {{ item.data }}
+          </td>
+          <td *ngSwitchCase="'object'" class="tg-0lax non-draggable">
+            {{ item.data | prettyprint }}
+          </td>
+          <td *ngSwitchCase="'none'" class="tg-0lax non-draggable">
+            {{ item.data.toString() }}
+          </td>
+          <td *ngSwitchDefault class="tg-0lax non-draggable">
+            {{ item.data.toString() }}
+          </td>
+        </ng-container>
+      </tr>
+    </tbody>
+  </table>
 
-<table class="tg">
-  <thead>
-    <tr>
-      <th class="tg-0lax non-draggable">Name</th>
-      <th class="tg-0lax non-draggable">Value</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let item of itemArray; index as i">
-
-      <td class="tg-0lax non-draggable">{{ item.name }}</td>
-
-      <ng-container [ngSwitch]="ItemTypeIs(item)">
-        <td *ngSwitchCase="'date'"  class="tg-0lax non-draggable">{{ item.data | date:'mm:ss' }}</td>
-        <td *ngSwitchCase="'string'" class="tg-0lax non-draggable">{{ item.data }}</td>
-        <td *ngSwitchCase="'object'" class="tg-0lax non-draggable">{{ item.data | prettyprint }}</td>
-        <td *ngSwitchCase="'none'" class="tg-0lax non-draggable">{{ item.data.toString() }}</td>
-        <td *ngSwitchDefault class="tg-0lax non-draggable">{{ item.data.toString() }}</td>
-      </ng-container>
-
-    </tr>
-  </tbody>
-</table>
-
-
-<div class="resize-action" (mousedown)="setStatus($event, 1)"></div>
-<span class="non-draggable">{{width | number:'1.0-0'}}px</span>
-<span class="non-draggable">{{height | number:'1.0-0'}}px</span>
-<span class="non-draggable">({{left}}, {{top}})</span>
+  <div class="resize-action" (mousedown)="setStatus($event, 1)"></div>
+  <span class="non-draggable">{{ width | number: "1.0-0" }}px</span>
+  <span class="non-draggable">{{ height | number: "1.0-0" }}px</span>
+  <span class="non-draggable">({{ left }}, {{ top }})</span>
 </div>
-
-
-<!-- <div class="time-box" *ngIf="p.value.playerTimer > 0">
-    {{ p.value.playerTimer * 1000 | date:'mm:ss' }}
-  </div> -->

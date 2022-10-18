@@ -7,6 +7,8 @@ import { Component, OnInit } from '@angular/core';
 })
 export class VideoPlayerComponent implements OnInit {
 
+  public static videoShow: boolean = false;
+
   constructor() { }
 
   ngOnInit() {
@@ -14,8 +16,19 @@ export class VideoPlayerComponent implements OnInit {
 
   }
 
+  ngAfterViewInit(): void {
+    var video = document.getElementsByTagName('video')[0];
+
+    video.onended = function(e) {
+      video.style.display ='none';
+    };
+  }
+
+
   public static powerSwitch() {
     let body = document.getElementById("wrapper");
     body!.className = (body!.className == "on") ? "off" : "on";
+    if (!this.videoShow) document.getElementsByTagName('video')[0].style.display = 'none';
+
   }
 }
