@@ -1,6 +1,13 @@
-<div style="display: inline-block; position: relative">
+<div
+  style="
+    display: inline-block;
+    position: relative;
+    padding: 50px 39px 28px 38px;
+    background: repeating-linear-gradient(0, #fff, #fff 2px, transparent 4px);
+  "
+>
   <div
-  [ngClass]="flickerOn ? 'animate-flicker' : 'opacity-zeroed'"
+    [ngClass]="flickerOn ? 'animate-flicker' : 'opacity-zeroed'"
     id="overlappingDiv"
     style="
       background-color: black;
@@ -14,24 +21,62 @@
     "
   ></div>
 
-  <app-video-player *ngIf="algorythmsMan" class="video-player"></app-video-player>
+  <app-video-player
+    *ngIf="algorythmsMan"
+    class="video-player"
+  ></app-video-player>
 
   <canvas class="canvas"></canvas>
 
-  <div *ngIf="!warrior1Ready && this.clicked" id="parent">
-    <div id="child" class="abc non-draggable">Loading Fierce Veggies...
-
-
-    </div>
+  <div *ngIf="!warrior1Ready && clicked && !algorythmsMan" id="parent">
+    <div id="child" class="abc non-draggable">Loading Fierce Veggies...</div>
   </div>
 </div>
 
 <div class="button-box">
-  <div class="button button-red" (click)="addBattleStartClickHandler()"><div class="outer"><div class="height"><div class="inner"><span class="non-draggable">FIGHT</span></div></div></div></div>
+  <div
+    class="button button-red"
+    id="disabled-button1"
+    (click)="addBattleStartClickHandler()"
+  >
+    <div class="outer">
+      <div class="height">
+        <div class="inner"><span class="non-draggable">FIGHT</span></div>
+      </div>
+    </div>
+  </div>
 
-  <div class="button button-green" (click)="wannaBeAlgoExpert()"><div class="outer"><div class="height"><div class="inner" style="line-height: 1em !important;"><span style="font-size: 20px;font-weight: bold;line-height: 1em;font-stretch: extra-condensed;"><span class="non-draggable">Pick a question on algoExpert (dot) io</span></span></div></div></div></div>
+  <div class="button button-green" (click)="wannaBeAlgoExpert()">
+    <div class="outer">
+      <div class="height">
+        <div class="inner" style="line-height: 1em !important">
+          <span
+            style="
+              font-size: 20px;
+              font-weight: bold;
+              line-height: 1em;
+              font-stretch: extra-condensed;
+            "
+            ><span class="non-draggable">{{
+              algorythmsMan
+                ? "nah bro, let me back to game"
+                : "Pick a question on algoExpert (dot) io"
+            }}</span></span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <div class="button button-blue"><div class="outer"><div class="height"><div class="inner"><span class="non-draggable">EVOLVE</span></div></div></div></div>
+  <div class="button button-blue" id="disabled-button2">
+    <div class="outer">
+      <div class="height">
+        <div class="inner"><span class="non-draggable">EVOLVE</span></div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="loading-spinner-box non-draggable"><div *ngIf="!warrior1Ready && this.clicked"  class="loader"></div></div>
+<div class="loading-spinner-box non-draggable">
+  <div *ngIf="!warrior1Ready && clicked && !algorythmsMan" class="loader"></div>
+</div>

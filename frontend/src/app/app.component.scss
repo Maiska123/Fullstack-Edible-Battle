@@ -13,35 +13,11 @@
   background-color: rgba(255, 255, 255, 0);
   font-family: arial;
   font-size: 24px;
-  color-rendering: optimizeQuality;
-  color-rendering: optimizeQuality;
   color-rendering: optimizeSpeed;
-  color-rendering: optimizeQuality;
-  color-rendering: optimizeSpeed;
-  color-rendering: optimizequality;
-  color-rendering: optimizeSpeed;
-  color-rendering: optimizeQuality;
-  color-rendering: optimizeSpeed;
-  color-rendering: optimizeQuality;
-  color-rendering: auto;
-  color-rendering: optimizeQuality;
-  color-rendering: optimizeSpeed;
-  color-rendering: optimizequality;
-  color-rendering: optimizespeed;
+  image-rendering: pixelated;
   color-scheme: auto;
-  color-rendering: optimizespeed;
-  color-rendering: optimizequality;
-  color-rendering: optimizeSpeed;
-  color-rendering: optimizeQuality;
-  color-rendering: auto;
   color-interpolation-filters: srgb;
-  color-interpolation-filters: linearrgb;
-  color-interpolation-filters: auto;
-  color-interpolation: srgb;
   color-interpolation: sRGB;
-  color-interpolation: linearrgb;
-  color-interpolation: linearRGB;
-  color-interpolation: auto;
   color: currentcolor;
   color: black;
   display: flex;
@@ -62,35 +38,10 @@
   background-color: rgba(255, 255, 255, 0);
   font-family: arial;
   font-size: 24px;
-  color-rendering: optimizeQuality;
-  color-rendering: optimizeQuality;
   color-rendering: optimizeSpeed;
-  color-rendering: optimizeQuality;
-  color-rendering: optimizeSpeed;
-  color-rendering: optimizequality;
-  color-rendering: optimizeSpeed;
-  color-rendering: optimizeQuality;
-  color-rendering: optimizeSpeed;
-  color-rendering: optimizeQuality;
-  color-rendering: auto;
-  color-rendering: optimizeQuality;
-  color-rendering: optimizeSpeed;
-  color-rendering: optimizequality;
-  color-rendering: optimizespeed;
   color-scheme: auto;
-  color-rendering: optimizespeed;
-  color-rendering: optimizequality;
-  color-rendering: optimizeSpeed;
-  color-rendering: optimizeQuality;
-  color-rendering: auto;
   color-interpolation-filters: srgb;
-  color-interpolation-filters: linearrgb;
-  color-interpolation-filters: auto;
-  color-interpolation: srgb;
   color-interpolation: sRGB;
-  color-interpolation: linearrgb;
-  color-interpolation: linearRGB;
-  color-interpolation: auto;
   color: currentcolor;
   color: black;
   /* top: 0; */
@@ -105,7 +56,6 @@
   flex-wrap: nowrap;
   flex-direction: column;
   align-items: stretch;
-
 }
 
 #fullscreen:-webkit-full-screen,
@@ -148,6 +98,7 @@
   background-image: url(../assets/background_marquee.png);
   position: fixed;
   z-index: 9999999;
+  transform: scale3d(1, 1.04, 1);
   width: -webkit-fill-available;
   height: -webkit-fill-available;
   background-repeat: no-repeat;
