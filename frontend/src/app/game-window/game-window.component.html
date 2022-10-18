@@ -1,9 +1,11 @@
 <div
   style="
+    margin-bottom: 13px;
     display: inline-block;
     position: relative;
-    padding: 50px 39px 28px 38px;
+    padding: 39px 39px 17px 38px;
     background: repeating-linear-gradient(0, #fff, #fff 2px, transparent 4px);
+    box-shadow: -6px 14px 12px 4px rgb(255 255 255 / 97%);
   "
 >
   <div
@@ -26,18 +28,26 @@
     class="video-player"
   ></app-video-player>
 
+<app-dialog-box  *ngIf="clicked" [inputData]="dialogText" [inputEnded]="textInputEnded"></app-dialog-box>
+
+<!-- GAME CANVAS -->
   <canvas class="canvas"></canvas>
 
+
+<!-- LOADING BAR -->
   <div *ngIf="!warrior1Ready && clicked && !algorythmsMan" id="parent">
     <div id="child" class="abc non-draggable">Loading Fierce Veggies...</div>
   </div>
 </div>
 
+<!--  -->
+<!-- BUTTONS -->
+<!--  -->
 <div class="button-box">
   <div
     class="button button-red"
     id="disabled-button1"
-    (click)="addBattleStartClickHandler()"
+    (click)="pushedButton('red')"
   >
     <div class="outer">
       <div class="height">
@@ -46,7 +56,7 @@
     </div>
   </div>
 
-  <div class="button button-green" (click)="wannaBeAlgoExpert()">
+  <div class="button button-green" (click)="pushedButton('green')">
     <div class="outer">
       <div class="height">
         <div class="inner" style="line-height: 1em !important">
@@ -68,7 +78,11 @@
     </div>
   </div>
 
-  <div class="button button-blue" id="disabled-button2">
+  <div
+    class="button button-blue"
+    id="disabled-button2"
+    (click)="pushedButton('blue')"
+  >
     <div class="outer">
       <div class="height">
         <div class="inner"><span class="non-draggable">EVOLVE</span></div>
@@ -77,6 +91,7 @@
   </div>
 </div>
 
+<!-- LOADING SPINNER -->
 <div class="loading-spinner-box non-draggable">
   <div *ngIf="!warrior1Ready && clicked && !algorythmsMan" class="loader"></div>
 </div>

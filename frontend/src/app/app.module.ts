@@ -1,3 +1,4 @@
+import { DialogBoxComponent } from './game-window/dialog-box/dialog-box.component';
 import { PrettyPrintPipe } from './utils/pipes/PrettyPrint.pipe';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -11,12 +12,13 @@ import { HttpClientModule } from '@angular/common/http';
 import { VideoPlayerComponent } from './video-player/video-player.component';
 
 @NgModule({
-  declarations: [	
+  declarations: [
     AppComponent,
       GameWindowComponent,
       DebugWindowComponent,
       PrettyPrintPipe,
-      VideoPlayerComponent
+      VideoPlayerComponent,
+      DialogBoxComponent
    ],
   imports: [
     BrowserModule,

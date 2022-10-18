@@ -3,7 +3,7 @@ import { GameImageService, IWaitingCounter } from './../services/game-image.serv
 import { AudioService } from './../services/audio.service';
 import { GameStatsService } from './../services/game-stats.service';
 import { Component, OnInit } from '@angular/core';
-import { switchMap } from 'rxjs';
+import { switchMap, Subject } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { VideoPlayerComponent } from '../video-player/video-player.component';
 
@@ -16,6 +16,22 @@ export interface IWarriorSprite {
   currentframe: number;
   totalframes: number;
 }
+
+export enum imagePos{
+  first,
+  second,
+  third,
+  fourth
+}
+
+export const imagePosDescription: {
+  [key in imagePos]: number[];
+} = {
+  [imagePos.first]: [0, 0, 512, 512],
+  [imagePos.second]: [512, 0, 512, 512],
+  [imagePos.third]: [0, 512, 512, 512],
+  [imagePos.fourth]: [512, 512, 512, 512]
+};
 
 @Component({
   selector: 'app-game-window',
@@ -30,6 +46,8 @@ export class GameWindowComponent implements OnInit {
   readonly failoverCounter: number = 3;
   lastFetchedCounter: Date = new Date();
   accumulator: number = 1;
+  private adjectivesToStart: string[] = ["angry","bold","brutal","cutthroat","dangerous","ferocious","fiery","furious","intense","murderous","passionate","powerful","raging","relentless","savage","stormy","strong","terrible","vehement","vicious","animal","ape","awful","barbarous","bloodthirsty","blustery","boisterous","brutish","cruel","enraged","fell","feral","flipped","frightening","horrible","howling","impetuous","infuriated","malevolent","malign","primitive","raving","tempestuous","threatening","tigerish","truculent","tumultous/tumultuous","uncontrollable","untamed","venomous","wild"]
+
   counterData1!: IWaitingCounter;
   warrior1Image: IWarriorSprite = {
     img: null,
@@ -51,9 +69,13 @@ export class GameWindowComponent implements OnInit {
     totalframes: 0,
   };
   warrior1Name: string = '';
+  warrior2Name: string = '';
 
   warrior1Ready: boolean = false;
   warrior2Ready: boolean = false;
+
+  warrior1ImageBlob!: Blob;
+  warrior1EvolveStage: imagePos = imagePos.first;
 
   public algorythmsMan: boolean = false;
   public flickerOn: boolean = false;
@@ -63,18 +85,29 @@ export class GameWindowComponent implements OnInit {
   loadingPercentage: number = 0;
   loadingbar!: HTMLDivElement;
 
+
+  /******** ETC */
+  public dialogText: string = ''
+  public textInputEnded: boolean = false;
+  private dialogSubject: Subject<string> = new Subject<string>();
+
+
+
   constructor(
     private gameStatsService: GameStatsService,
     private audioService: AudioService,
     private imageService: GameImageService
-  ) {}
+  ) {
+    this.dialogSubject.subscribe((text) => {
+      this.dialogText = text;
+    })
+  }
 
   ngOnInit(): void {
     this.gameStatsService.startSth();
   }
 
   ngAfterViewInit(): void {
-    this.audioService.viewDidLoad();
 
     this.initializeCanvas();
 
@@ -83,11 +116,114 @@ export class GameWindowComponent implements OnInit {
 
       console.log(this.c);
     }
+    this.audioService.viewDidLoad();
+
+
+    for (const key in document.getElementsByClassName('button')) {
+      document.getElementsByClassName('button').item(Number(key))!
+      .addEventListener('mousedown', () => {
+        this.audioService.playButtonSound();
+      });
+
+      document.getElementsByClassName('button').item(Number(key))!
+      .addEventListener('mouseup', () => {
+        this.audioService.playButtonSound(false);
+      });
+
+    }
   }
+
+public dialogTextInputEffect(text: string, textAt: number = 0): void {
+
+  if (textAt <= text.length) {
+    this.textInputEnded = false;
+
+    this.audioService.playTextSound();
+
+    this.dialogSubject.next(text.substring(0,textAt));
+
+    setTimeout(() => this.dialogTextInputEffect(text, textAt + 1),50)
+
+  }
+  else {
+    this.textInputEnded = true;
+  }
+
+}
+
+
+public evolveMyVeggie(){
+  // this.warrior1ImageBlob = image;
+  // let startX, startY, stopX, StopY;
+  this.warrior1EvolveStage = this.warrior1EvolveStage+1;
+  if (this.warrior1EvolveStage == 3) this.disableEvolve();
+  if (this.warrior1EvolveStage <= 3){
+
+    createImageBitmap(this.warrior1ImageBlob,
+                        imagePosDescription[this.warrior1EvolveStage][0],
+                        imagePosDescription[this.warrior1EvolveStage][1],
+                        imagePosDescription[this.warrior1EvolveStage][2],
+                        imagePosDescription[this.warrior1EvolveStage][3],
+                        {
+                        resizeWidth: 250,
+                        resizeHeight: 250,
+                      })
+                        .then((imageBitmap: ImageBitmap) => {
+                          this.bitmapCache = imageBitmap;
+                        })
+                        .finally(() => {
+                          this.warrior1Ready = true;
+                          console.log('Drawing Image');
+                          if (this.c) {
+                            this.c.drawImage(this.bitmapCache, 200, 220);
+                          }
+                        });
+      if (this.c) {
+        this.c.drawImage(this.bitmapCache, 200, 220);
+      }
+  }
+}
+
+advanceBattle() {
+  let word = 'You sure are '+ this.adjectivesToStart[(Math.floor(Math.random() * this.adjectivesToStart.length) + 1)] +' button clicker...'
+  this.dialogTextInputEffect(word);
+}
+
+  public pushedButton(callbackName?: string){
+
+
+    switch (callbackName) {
+      case 'red':
+        if (!this.clicked) {
+          this.addBattleStartClickHandler()
+          let word = 'Started '+ this.adjectivesToStart[(Math.floor(Math.random() * this.adjectivesToStart.length) + 1)] +' Battle...'
+          this.dialogTextInputEffect(word);
+        } else {
+          this.advanceBattle();
+        }
+
+        break;
+      case 'green':
+        this.wannaBeAlgoExpert()
+        break;
+      case 'blue':
+        this.evolveMyVeggie()
+        break;
+      default:
+        break;
+    }
+  }
+
+
+  public disableEvolve(){
+    document.getElementById('disabled-button2')?.setAttribute('disabled','')
+  }
+
 
    public wannaBeAlgoExpert() {
 
     if(this.algorythmsMan) {
+
       VideoPlayerComponent.videoShow = false;
 
       VideoPlayerComponent.powerSwitch();
@@ -95,13 +231,15 @@ export class GameWindowComponent implements OnInit {
       setTimeout(() => {
 
          this.algorythmsMan = false;
+         this.audioService.bringTheBeatBack();
 
          document.getElementById('disabled-button1')?.removeAttribute('disabled')
-         document.getElementById('disabled-button2')?.removeAttribute('disabled')
+         if (!(this.warrior1EvolveStage == 3)) document.getElementById('disabled-button2')?.removeAttribute('disabled')
       }, 500);
     }
-
     this.algorythmsMan = true;
+
+    this.audioService.dimBGMusic();
 
     document.getElementById('disabled-button1')?.setAttribute('disabled','')
     document.getElementById('disabled-button2')?.setAttribute('disabled','')
@@ -254,10 +392,8 @@ export class GameWindowComponent implements OnInit {
           (x) => x.getValue().name == 'Random Veggie'
         )
         ) {
-        this.audioService.toggleBgMusicPlaying();
-        console.log(this.audioService);
-
         this.clicked = true;
+        this.audioService.toggleBgMusicPlaying();
 
         if (
           this.gameStatsService.observables$.some(
@@ -279,6 +415,7 @@ export class GameWindowComponent implements OnInit {
               this.imageService
                 .generateImageWithName(Stats.name)
                 .subscribe((image: Blob) => {
+                  this.warrior1ImageBlob = image;
                   console.log('Got Image!');
                   createImageBitmap(image, 0, 0, 512, 512, {
                     resizeWidth: 250,
@@ -292,6 +429,8 @@ export class GameWindowComponent implements OnInit {
                       console.log('Drawing Image');
                       if (this.c) {
                         this.c.drawImage(this.bitmapCache, 200, 220);
+                        this.dialogTextInputEffect(`First Contestant enters the battlefield... Say hello to ${this.warrior1Name}!`);
+
                       }
                     });
                 });

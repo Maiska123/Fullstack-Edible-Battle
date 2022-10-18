@@ -4,7 +4,7 @@
 
 .canvas {
   filter: opacity(0.7) blur(0.01px) brightness(0.9) contrast(1.2);
-  transform: scale(1.12) translate(-36px, -13px);
+  transform: scale(1.12) translate(-21px, -23px);
 }
 
 #child {
@@ -19,8 +19,8 @@
 }
 
 #parent {
-  top: 0;
-  left: 0;
+  bottom: 100px;
+  left: 100px;
   margin: 0;
   position: absolute;
   /* Center vertically and horizontally */

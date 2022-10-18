@@ -7,6 +7,13 @@ export interface SoundInterface {
   howl: Howl;
 }
 
+export interface SpriteInterface {
+  src: string,
+  sprite: {
+    [key:string]: number[]
+  }
+}
+
 export interface SoundProgressInterface {
   played: number;
   remaining: number;
@@ -15,57 +22,101 @@ export interface SoundProgressInterface {
 
 export class HowlerPlayer {
   private _sounds: Array<SoundInterface>;
+  private _sprites!: Howl;
+  private _textSprites!: Howl;
   private _index: number;
 
   private $progress: Subject<SoundProgressInterface>;
 
+
+  playTextSound(){
+    this._textSprites.play('textinput');
+  }
+
+  dimMusic(){
+    let sound = this._sounds[this._index].howl;
+    sound.volume(0.4)
+  }
+
+  bringTheBeatBack() {
+    let sound = this._sounds[this._index].howl;
+    sound.volume(1)
+    // sound.volume(1.5)
+  }
+
   /** */
   constructor(playlist: Array<String>) {
-    this._index = 1;
+    this._index = 2;
     this._sounds = playlist.map((pSong: any) => ({
       sourceUrl: pSong,
       howl: null,
     } as unknown as SoundInterface )) as SoundInterface[];
 
     this.$progress = new Subject();
+
+    this._sprites = new Howl({
+      src: ['assets/button-click.wav'],
+      sprite: {
+        buttondown: [50, 200],
+        buttonup: [300, 500]
+      }
+    });
+
+    this._textSprites = new Howl({
+      src: ['assets/typewriter.mp3'],
+      sprite: {
+        textinput: [100, 200]
+      }
+    });
+
+
+  }
+
+  public playButtonSound(down: boolean): void {
+    down ?
+    this._sprites.play('buttondown')
+    : this._sprites.play('buttonup');
   }
 
   /** */
-  public play(index: number = 0) {
-    if (index == 0) index = this._index;
-    else if (index < 0 || index >= this._sounds.length) index = 0;
+  public play(index: number = 0, volDown?: boolean) {
 
     let sound = this._sounds[index];
-    if (!sound.howl) {
-      sound.howl = new Howl({
-        src: [sound.sourceUrl],
-        html5: true,
-        autoplay: false,
-        volume: 0,
-        onplay: () => {
-          requestAnimationFrame(this.seekStep); //  PROGRESS STEP CALL
-        },
-        onseek: () => {
-          // Start upating the progress of the track.
-          requestAnimationFrame(this.seekStep);
-        },
-        onend: () => {
-          this.skip('next');
-        },
-      });
-    }
+
+    sound.howl = new Howl({
+      src: [sound.sourceUrl],
+      html5: true,
+      autoplay: false,
+      volume: volDown ? 0.5 : 1,
+
+      onplay: () => {
+        requestAnimationFrame(this.seekStep); //  PROGRESS STEP CALL
+      },
+      onseek: () => {
+        // Start upating the progress of the track.
+        requestAnimationFrame(this.seekStep);
+      },
+      onend: () => {
+        this.skip('next');
+      },
+    });
+
     this.index = index;
 
-    let howl = sound.howl;
-    howl.fade(0, 1, 500);
-    howl.play();
+    if (sound.howl == null) {
+      this.skip();
+    } else {
+      let howl = sound.howl;
+      howl.fade(0, 1, 200);
+      howl.play();
+    }
   }
 
   /** */
   public pause(): void {
     let sound = this._sounds[this._index].howl;
     if (sound) {
-      sound.fade(1, 0, 500);
+      sound.fade(1, 0, 200);
       sound.once('fade', () => {
         sound.pause();
         sound.volume(1);
@@ -105,8 +156,6 @@ export class HowlerPlayer {
       newIndex = newIndex - 1 < 0 ? this._sounds.length - 1 : newIndex - 1;
     }
 
-    newIndex = newIndex == 0 ? newIndex + 1 : newIndex;
-
     this.skipTo(newIndex);
   }
 
@@ -114,7 +163,6 @@ export class HowlerPlayer {
   public skipTo(index: number) {
     if (index < 0 || index >= this._sounds.length) index = 0;
 
-    this.stop();
     this.play(index);
   }
 
