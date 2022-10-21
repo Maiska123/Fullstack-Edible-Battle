@@ -60,7 +60,7 @@ export class GameImageService {
   }
 
   public generateImageWithName(veggieName: string): Observable<Blob> {
-    const path = `/${encodeURIComponent(veggieName)}`
+    const path = `/${encodeURIComponent((veggieName.replaceAll('/','-').replaceAll('\\','-')))}`
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json'
@@ -70,7 +70,7 @@ export class GameImageService {
   }
 
   public getImageUsageCounterByName(veggieName: string): Observable<number> {
-    const path = `/utils/counter/${encodeURIComponent(veggieName)}`
+    const path = `/utils/counter/${encodeURIComponent((veggieName.replaceAll('/','-')).replaceAll('\\','-'))}`
     return this.http.get<number>(this.apiBaseUrl + this.serviceUrl + path);
   }
 

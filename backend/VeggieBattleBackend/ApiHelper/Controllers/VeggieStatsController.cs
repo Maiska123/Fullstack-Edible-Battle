@@ -1,6 +1,7 @@
 namespace ApiHelper.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
+using ApiHelper.Services;
 
 [ApiController]
 [Route ("[controller]")]
@@ -9,9 +10,13 @@ public class VeggieStatsController : ControllerBase {
     private static readonly StatProcessor Stat = new StatProcessor ();
 
     private readonly ILogger<VeggieStatsController> _logger;
+    private readonly IVeggieCacheService _cacheService;
 
-    public VeggieStatsController (ILogger<VeggieStatsController> logger) {
+    public VeggieStatsController (
+        ILogger<VeggieStatsController> logger,
+        IVeggieCacheService service) {
         _logger = logger;
+        _cacheService = service;
     }
 
     [HttpGet ("GetVeggieStats")]
@@ -28,6 +33,13 @@ public class VeggieStatsController : ControllerBase {
         ApiClientHelper.InitializeClient ();
         var stats = await Stat.LoadStatsById (veggieId, offline);
         return new WarriorStatModel (veggieId, stats.Name.ENG, stats);
+    }
+
+    [HttpPost ("{veggieId}")]
+    public async Task<IActionResult> CacheVeggieStats (int veggieId, WarriorStatModel stats) // <StatModel>
+    {
+        _cacheService.InsertVeggieStatsWithId(veggieId,stats);
+        return Ok(veggieId);
     }
 
     [HttpGet ("createwarrior/random")]

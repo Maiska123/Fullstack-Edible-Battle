@@ -1,6 +1,8 @@
 namespace ApiHelper;
 
 public class VeggieModel {
+
+    public WarriorStatModel Stats { get; set; }
     private int UsageCount = 0;
     private int MaxUsage = 4;
 
@@ -24,9 +26,22 @@ public class VeggieModel {
     }
 
     public VeggieModel (string queryName, string? url, byte[] ? bytes) {
+        Stats = new(queryName);
         QueryName = queryName;
         Url = url;
         VeggieBytes = bytes;
+    }
+
+    public void addStats(WarriorStatModel model) {
+        Stats = new(
+                model.Name,
+                model.Id,
+                model.Hp,
+                model.Attack,
+                model.Defence,
+                model.Speed,
+                model.Luck
+        );
     }
 
 }

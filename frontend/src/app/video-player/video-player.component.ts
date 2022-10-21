@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-video-player',
@@ -6,6 +6,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./video-player.component.css']
 })
 export class VideoPlayerComponent implements OnInit {
+  @Input() gameOver: boolean = false;
 
   public static videoShow: boolean = false;
 
@@ -19,9 +20,14 @@ export class VideoPlayerComponent implements OnInit {
   ngAfterViewInit(): void {
     var video = document.getElementsByTagName('video')[0];
 
-    video.onended = function(e) {
+    if (this.gameOver){
       video.style.display ='none';
-    };
+      document.getElementById('text')!.innerHTML = 'Game Over';
+    } else {
+      video.onended = function(e) {
+        video.style.display ='none';
+      };
+    }
   }
 
 

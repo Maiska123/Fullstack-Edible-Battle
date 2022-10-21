@@ -27,10 +27,15 @@ export class HowlerPlayer {
   private _index: number;
 
   private $progress: Subject<SoundProgressInterface>;
+  private _OkSprites: Howl;
 
 
   playTextSound(){
     this._textSprites.play('textinput');
+  }
+
+  playOkSound(){
+    this._OkSprites.play('cursor');
   }
 
   dimMusic(){
@@ -55,7 +60,7 @@ export class HowlerPlayer {
     this.$progress = new Subject();
 
     this._sprites = new Howl({
-      src: ['assets/button-click.wav'],
+      src: ['assets/audio/button-click.wav'],
       sprite: {
         buttondown: [50, 200],
         buttonup: [300, 500]
@@ -63,9 +68,16 @@ export class HowlerPlayer {
     });
 
     this._textSprites = new Howl({
-      src: ['assets/typewriter.mp3'],
+      src: ['assets/audio/typewriter.mp3'],
       sprite: {
         textinput: [100, 200]
+      }
+    });
+
+    this._OkSprites = new Howl({
+      src: ['assets/audio/ff7cursor.mp3'],
+      sprite: {
+        cursor: [0, 200]
       }
     });
 

@@ -12,6 +12,11 @@ public struct VeggieString {
 public class VeggieStashModel {
     public List<VeggieModel> Veggies = new ();
 
+
+    public void addVeggieStatsbyName (WarriorStatModel incomingStats) {
+         Veggies.Find (x => x.QueryName == incomingStats.Name).addStats(incomingStats);
+    }
+
     public void AddVeggie (VeggieModel veggie) {
         if (Veggies is null) {
             Veggies = new ();
@@ -66,7 +71,7 @@ public class VeggieStashModel {
         string veggieString = $"[{{\"count\": {Veggies.Count()}}}";
 
         foreach (VeggieModel veggie in Veggies) {
-            veggieString += $",{{\"Name\": \"{veggie.QueryName}\", \"url\": \"{veggie.Url}\"}}";
+            veggieString += $",{{\"Name\": \"{veggie.QueryName}\",\"Id\": \"{veggie?.Stats?.Id}\", \"url\": \"{veggie?.Url}\"}}";
         }
         veggieString += "]";
         return Task.FromResult (veggieString);

@@ -1,5 +1,5 @@
 namespace ApiHelper;
-
+using System.Text.Json.Serialization;
 public class WarriorStatModel {
         /*
         100 grammaa sisältää:
@@ -25,6 +25,9 @@ public class WarriorStatModel {
 
         public double Luck { get; set; }
 
+        public WarriorStatModel(string name){
+                Name = name;
+        }
         public WarriorStatModel (int id, string name, StatModel Parameters) {
                 Name = name;
                 Id = id;
@@ -33,6 +36,25 @@ public class WarriorStatModel {
                 Defence = Parameters.Protein;
                 Speed = (Parameters.Carbohydrate + Parameters.Protein + Parameters.Fat);
                 Luck = Parameters.SaturatedFat;
+        }
+
+         [JsonConstructor]
+        public WarriorStatModel (
+                string name,
+                int id,
+                double hp,
+                double attack,
+                double defence,
+                double speed,
+                double luck
+        ) {
+                Name = name;
+                Id = id;
+                Hp = hp;
+                Attack = attack;
+                Defence = defence;
+                Speed = speed;
+                Luck = luck;
         }
         /*
                 carbohydrate: 8.3100004196167,
