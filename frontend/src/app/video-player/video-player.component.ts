@@ -13,7 +13,18 @@ export class VideoPlayerComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
+    var video = document.getElementsByTagName('video')[0];
 
+    if (this.gameOver){
+      video.style.display ='none';
+      video.setAttribute('autoplay','false');
+      document.getElementById('text')!.innerHTML = 'Game Over';
+    } else {
+      video.setAttribute('autoplay','true');
+      video.onended = function(e) {
+        video.style.display ='none';
+      };
+    }
 
   }
 
@@ -22,8 +33,10 @@ export class VideoPlayerComponent implements OnInit {
 
     if (this.gameOver){
       video.style.display ='none';
+      video.setAttribute('autoplay','false');
       document.getElementById('text')!.innerHTML = 'Game Over';
     } else {
+      video.setAttribute('autoplay','true');
       video.onended = function(e) {
         video.style.display ='none';
       };

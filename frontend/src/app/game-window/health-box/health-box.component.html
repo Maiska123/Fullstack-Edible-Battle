@@ -1,4 +1,4 @@
-<div [ngClass]="isEnemy ? 'box1' : 'box2'">
+<div [ngClass]="isEnemy ? 'box2' : 'box1'" [@openClose]="isOpen ? true : false">
   <p style="margin: 0;" [ngStyle]="this.name.length > 88 ? {'font-size': '8px'} : {'font-size': '9px'}">
     {{name}} <span *ngIf="this.name.length < 1"> waiting for contestant...  </span>
   </p>

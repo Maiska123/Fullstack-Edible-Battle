@@ -173,7 +173,7 @@ export class HowlerPlayer {
 
   /***/
   public skipTo(index: number) {
-    if (index < 0 || index >= this._sounds.length) index = 0;
+    if (!index || index > this._sounds.length) index = 0;
 
     this.play(index);
   }
