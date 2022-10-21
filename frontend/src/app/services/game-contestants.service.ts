@@ -68,4 +68,11 @@ export class GameContestantsService {
     return this.http.get<IContestantStats>(this.apiBaseUrl + this.serviceUrl + path, options);
   }
 
+  public setContestantStatsById(veggieId: number, stats: IContestantStats): Observable<boolean> {
+    const path = `/${veggieId}`
+    stats.name = encodeURIComponent((stats.name.replaceAll('\\','-')).replaceAll('/','-')) // name could have special characters :( stupid dotnet webapi modelbindings
+
+    return this.http.post<any>(this.apiBaseUrl + this.serviceUrl + path, stats);
+  }
+
 }

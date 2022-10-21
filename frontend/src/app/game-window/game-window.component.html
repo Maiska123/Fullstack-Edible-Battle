@@ -23,19 +23,21 @@
     "
   ></div>
 
-  <app-video-player
+  <app-video-player [gameOver]="gameOver"
     *ngIf="algorythmsMan"
     class="video-player"
   ></app-video-player>
 
 <app-dialog-box  *ngIf="clicked" [inputData]="dialogText" [inputEnded]="textInputEnded"></app-dialog-box>
 
+<app-health-box *ngIf="warrior2Ready" [name]="enemyName" [amountIn]="enemyHpAmount" [maxAmount]="enemyMaxHp" [isEnemy]="enemyTrue"></app-health-box>
+<app-health-box *ngIf="warrior1Ready" [name]="heroName" [amountIn]="heroHpAmount" [maxAmount]="heroMaxHp" [isEnemy]="enemyFalse"></app-health-box>
 <!-- GAME CANVAS -->
   <canvas class="canvas"></canvas>
 
 
 <!-- LOADING BAR -->
-  <div *ngIf="!warrior1Ready && clicked && !algorythmsMan" id="parent">
+  <div *ngIf="(!warrior1Ready && clicked && !algorythmsMan) || (!warrior2Ready && warrior2Called && warrior1Ready && !algorythmsMan)" id="parent">
     <div id="child" class="abc non-draggable">Loading Fierce Veggies...</div>
   </div>
 </div>
@@ -93,5 +95,5 @@
 
 <!-- LOADING SPINNER -->
 <div class="loading-spinner-box non-draggable">
-  <div *ngIf="!warrior1Ready && clicked && !algorythmsMan" class="loader"></div>
+  <div *ngIf="(!warrior1Ready && clicked && !algorythmsMan) || (!warrior2Ready && warrior2Called && warrior1Ready && !algorythmsMan) " class="loader"></div>
 </div>

@@ -1,3 +1,4 @@
+import { HealthBoxComponent } from './game-window/health-box/health-box.component';
 import { DialogBoxComponent } from './game-window/dialog-box/dialog-box.component';
 import { PrettyPrintPipe } from './utils/pipes/PrettyPrint.pipe';
 import { NgModule } from '@angular/core';
@@ -18,7 +19,8 @@ import { VideoPlayerComponent } from './video-player/video-player.component';
       DebugWindowComponent,
       PrettyPrintPipe,
       VideoPlayerComponent,
-      DialogBoxComponent
+      DialogBoxComponent,
+      HealthBoxComponent
    ],
   imports: [
     BrowserModule,

@@ -5,7 +5,9 @@ import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   { path: 'game', component: GameWindowComponent },
+  { path: 'game/twitch', component: GameWindowComponent },
   { path: 'game/debug', component: GameWindowComponent },
+  { path: 'game/debug/twitch', component: GameWindowComponent },
   { path: 'debug', component: DebugWindowComponent },
 ];
 
