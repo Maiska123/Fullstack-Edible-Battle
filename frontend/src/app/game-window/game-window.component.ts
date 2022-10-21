@@ -354,7 +354,7 @@ this.lastRemaining2 = remaining2;
         - ((this.warrior2Stats.defence * this.warrior2Stats.luck) / this.warrior2Stats.hp)
         );
       this.warrior1Hits(Math.ceil(damage));
-      this.warrior1Stats.hp -= damage;
+      this.warrior2Stats.hp -= damage;
     }
     else { // warrior 2 deals damage
       let damage = ((
@@ -363,7 +363,7 @@ this.lastRemaining2 = remaining2;
         - ((this.warrior1Stats.defence * this.warrior1Stats.luck) / this.warrior1Stats.hp)
         );
       this.warrior2Hits(Math.ceil(damage));
-      this.warrior2Stats.hp -= damage;
+      this.warrior1Stats.hp -= damage;
     }
   // }
 
@@ -555,7 +555,9 @@ public pushedButton(callbackName?: string){
           this.addBattleStartClickHandler()
           let word = `Started ${this.adjectivesToStart[(Math.floor(Math.random() * this.adjectivesToStart.length) + 1)]} Battle...`;
           // this.battleQueue.push({ state: BattleState.dialogTextInput, message: word });
-          this.dialogTextInput(word, false);
+          setTimeout(() => {
+            this.dialogTextInput(word, false);
+          }, 2000);
         } else {
           if (!this.warrior2Ready && !this.warrior2Called){
             this.audioService.playOkSound();

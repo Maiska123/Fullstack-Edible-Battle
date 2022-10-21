@@ -19,6 +19,10 @@ public viewDidLoad(twitchMode: boolean = false) {
     "assets/audio/crickets.mp3",
   ])
   : new HowlerPlayer([
+    "assets/audio/battleBG7.mp3",
+    "assets/audio/battleBG8.mp3",
+    "assets/audio/battleBG9.mp3",
+    "assets/audio/battleBG10.mp3",
     "assets/audio/ff7battle.mp3",
     "assets/audio/pokemonvswild.mp3",
     "assets/audio/ff7battle.mp3",
@@ -29,10 +33,6 @@ public viewDidLoad(twitchMode: boolean = false) {
     "assets/audio/battleBG4.mp3",
     "assets/audio/battleBG5.mp3",
     "assets/audio/battleBG6.mp3",
-    "assets/audio/battleBG7.mp3",
-    "assets/audio/battleBG8.mp3",
-    "assets/audio/battleBG9.mp3",
-    "assets/audio/battleBG10.mp3",
   ]);
 
 }

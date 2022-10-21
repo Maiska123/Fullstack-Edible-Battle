@@ -118,7 +118,7 @@ export class DebugWindowComponent implements OnInit {
 
   public playPauseAndNext(){
     if (!this.audioService.bgMusicPlaying) {
-      this.audioService.toggleBgMusicPlaying();
+      // this.audioService.toggleBgMusicPlaying();
       this.audioService.skipForward();
     }
     else {

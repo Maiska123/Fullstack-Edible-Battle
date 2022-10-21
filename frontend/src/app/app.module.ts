@@ -11,6 +11,7 @@ import { DebugWindowComponent } from './debug-window/debug-window.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HttpClientModule } from '@angular/common/http';
 import { VideoPlayerComponent } from './video-player/video-player.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { VideoPlayerComponent } from './video-player/video-player.component';
     BrowserModule,
     AppRoutingModule,
     DragDropModule,
-    HttpClientModule
+    HttpClientModule,
+    BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent],

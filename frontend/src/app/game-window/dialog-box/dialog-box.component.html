@@ -1,1 +1,1 @@
-<div class="box">{{inputData.length < 88 ? inputData : inputData.substring(87)}}<i *ngIf="inputEnded"></i></div>
+<div class="box" [@openClose]="isOpen ? true : false">{{inputData.length < 88 ? inputData : inputData.substring(87)}}<i *ngIf="inputEnded"></i></div>
