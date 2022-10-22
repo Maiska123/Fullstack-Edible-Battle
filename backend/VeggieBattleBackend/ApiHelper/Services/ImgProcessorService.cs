@@ -16,9 +16,11 @@ public interface IImgProcessorService {
 }
 public class ImgProcessorService : IImgProcessorService {
 
+    private readonly IConfiguration _configuration;
     private readonly IVeggieCacheService _cacheService;
-    public ImgProcessorService (IVeggieCacheService service) {
+    public ImgProcessorService (IVeggieCacheService service, IConfiguration configuration) {
         _cacheService = service;
+        _configuration = configuration;
     }
 
     private int count = 0;
@@ -55,7 +57,7 @@ public class ImgProcessorService : IImgProcessorService {
 
         addToCounter (queryText);
 
-        DeepAI_API api = new DeepAI_API (apiKey: "d4a5a1e5-cc46-46a9-a48d-aeda74784411");
+        DeepAI_API api = new DeepAI_API (apiKey: _configuration.GetValue<string>("DeepAIApiKey"));
 
         addToCounter (queryText);
 
