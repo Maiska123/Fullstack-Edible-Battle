@@ -2,6 +2,11 @@ namespace ApiHelper;
 
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.IO;
+using Polly;
+using Polly.Extensions.Http;
+using Polly.CircuitBreaker;
+
 
 public enum StatKeyWord {
     /*
@@ -18,7 +23,15 @@ public enum StatKeyWord {
     LUCK = 4,
     FINALBOSS = 5
 }
-public class StatProcessor {
+public class StatProcessor 
+{
+    private readonly AsyncCircuitBreakerPolicy<HttpResponseMessage> _circuitBreaker =
+    Policy<HttpResponseMessage>
+        .Handle<HttpRequestException>()
+        .OrTransientHttpError()
+        .AdvancedCircuitBreakerAsync(0.5, TimeSpan.FromSeconds(10),10,TimeSpan.FromSeconds(15));
+
+
     public async Task<StatModel> LoadStats () {
         string url = "https://fineli.fi/fineli/api/v1/foods/1";
         using (HttpResponseMessage response = await ApiClientHelper.ApiClient.GetAsync (url)) {
@@ -30,19 +43,47 @@ public class StatProcessor {
             }
         }
     }
-    public async Task<StatModel> LoadStatsById (int id) {
+    public async Task<StatModel> LoadStatsById (int id, bool offline = false) {
         string url = $"https://fineli.fi/fineli/api/v1/foods/{id}";
 
-        using (HttpResponseMessage response = await ApiClientHelper.ApiClient.GetAsync (url)) {
+        if ((_circuitBreaker.CircuitState is CircuitState.Open or CircuitState.Isolated)
+        || offline)
+        {
+            return backupMethodFromFile();
+        }
+        try {
+            HttpResponseMessage response = await _circuitBreaker.ExecuteAsync(() =>
+                ApiClientHelper.ApiClient.GetAsync (url));
+
             if (response.IsSuccessStatusCode) {
                 StatModel stat = await response.Content.ReadFromJsonAsync<StatModel> ();
                 return stat;
             } else {
-                // throw new Exception(response.ReasonPhrase);
-                return null;
+                return backupMethodFromFile();
+
+                throw new Exception(response.ReasonPhrase);
             }
+            
+        } catch (Exception ex) {
+            return backupMethodFromFile();
+
+            throw ex;
         }
     }
+    public StatModel backupMethodFromFile (bool offline = false) {
+        Console.WriteLine( offline ?
+                "\nChanged to Backupmethod: using offline storage\n"
+            :   "\nChanged to Backupmethod: used API for Stats possible down\n"
+            );
+        
+        String allStaticVeggies = (File.ReadAllText(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "staticFiles/veggiestats.json")));
+        StatModel[] veggies = System.Text.Json.JsonSerializer.Deserialize<StatModel[]>(allStaticVeggies); 
+        Random random = new();
+        var newId = random.Next (0, veggies.Count());
+        return veggies.ElementAt(newId);
+    }
+
+
     public string getRandomWarriorName (string ingredient, StatKeyWord? extra) {
 
         string warriorName = "";
@@ -94,10 +135,10 @@ public class StatProcessor {
             stats.SaturatedFat > 50.00
         ) return StatKeyWord.FINALBOSS;
         if (stats.EnergyKcal > 200.00) return StatKeyWord.HP;
-        if (stats.Carbohydrate > 70.00) return StatKeyWord.ATTACK;
-        if (stats.Protein > 70.00) return StatKeyWord.DEFENCE;
+        if (stats.Carbohydrate > 50.00) return StatKeyWord.ATTACK;
+        if (stats.Protein > 50.00) return StatKeyWord.DEFENCE;
         if ((stats.Carbohydrate + stats.Protein + stats.Fat) > 70.00) return StatKeyWord.SPEED;
-        if (stats.SaturatedFat > 70.00) return StatKeyWord.LUCK;
+        if (stats.SaturatedFat > 50.00) return StatKeyWord.LUCK;
 
         return null;
     }

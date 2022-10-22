@@ -1,14 +1,21 @@
+
 namespace ApiHelper;
 
 using System.Text.Json.Serialization;
+
 public class FoodName {
+
     [JsonPropertyName ("en")]
     public string ENG { get; set; }
 
     [JsonPropertyName ("fi")]
     public string FIN { get; set; }
-}
+
+    }
+
 public class StatModel {
+
+
     [JsonPropertyName ("id")]
     public int Id { get; set; }
 
@@ -59,4 +66,6 @@ public class StatModel {
 
     [JsonPropertyName ("name")]
     public FoodName Name { get; set; }
+
+
 }

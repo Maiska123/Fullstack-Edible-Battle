@@ -1,0 +1,82 @@
+.tg {
+  border-collapse: collapse;
+  border-spacing: 0;
+  inline-size: -webkit-fill-available;
+}
+.tg td {
+  border-color: black;
+  border-style: solid;
+  border-width: 1px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  overflow: hidden;
+  padding: 10px 5px;
+  word-break: break-word;
+}
+.tg th {
+  border-color: black;
+  border-style: solid;
+  border-width: 1px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  overflow: hidden;
+  padding: 10px 5px;
+  word-break: normal;
+}
+.tg .tg-0lax {
+  text-align: left;
+  vertical-align: top;
+}
+
+.resizable-draggable {
+  outline: 1px dashed green;
+  &.active {
+      outline-style: solid;
+      background-color: #80ff800d;
+  }
+
+  &:hover {
+      cursor: all-scroll;
+  }
+
+  span:first-of-type {
+      position: absolute;
+      left: 50%;
+      transform: translate3d(-50%, 0%, 0);
+  }
+
+  span:nth-of-type(2) {
+      position: absolute;
+      top: 50%;
+      transform: translate3d(-100%, -50%, 0);
+  }
+
+  span:nth-of-type(3) {
+      position: absolute;
+      transform: translate3d(-100%, -100%, 0);
+  }
+}
+
+.resize-action {
+  position: absolute;
+  left: 100%;
+  top: 100%;
+  transform: translate3d(-50%, -50%, 0) rotateZ(45deg);
+  border-style: solid;
+  border-width: 8px;
+  border-color: transparent transparent transparent #008000;
+  &:hover, &:active {
+      cursor: nwse-resize;
+  }
+}
+
+.non-draggable{
+  pointer-events: none;
+  user-drag: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}

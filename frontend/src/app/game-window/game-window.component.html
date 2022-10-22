@@ -1,0 +1,99 @@
+<div
+  style="
+    margin-bottom: 13px;
+    display: inline-block;
+    position: relative;
+    padding: 39px 39px 17px 38px;
+    background: repeating-linear-gradient(0, #fff, #fff 2px, transparent 4px);
+    box-shadow: -6px 14px 12px 4px rgb(255 255 255 / 97%);
+  "
+>
+  <div
+    [ngClass]="flickerOn ? 'animate-flicker' : 'opacity-zeroed'"
+    id="overlappingDiv"
+    style="
+      background-color: black;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 10;
+    "
+  ></div>
+
+  <app-video-player [gameOver]="gameOver"
+    *ngIf="algorythmsMan"
+    class="video-player"
+  ></app-video-player>
+
+<app-dialog-box  *ngIf="clicked" [inputData]="dialogText" [inputEnded]="textInputEnded"></app-dialog-box>
+
+<app-health-box *ngIf="warrior2Ready" [name]="enemyName" [amountIn]="enemyHpAmount" [maxAmount]="enemyMaxHp" [isEnemy]="enemyTrue"></app-health-box>
+<app-health-box *ngIf="warrior1Ready" [name]="heroName" [amountIn]="heroHpAmount" [maxAmount]="heroMaxHp" [isEnemy]="enemyFalse"></app-health-box>
+<!-- GAME CANVAS -->
+  <canvas class="canvas"></canvas>
+
+
+<!-- LOADING BAR -->
+  <div *ngIf="(!warrior1Ready && clicked && !algorythmsMan) || (!warrior2Ready && warrior2Called && warrior1Ready && !algorythmsMan)" id="parent">
+    <div id="child" class="abc non-draggable">Loading Fierce Veggies...</div>
+  </div>
+</div>
+
+<!--  -->
+<!-- BUTTONS -->
+<!--  -->
+<div class="button-box">
+  <div
+    class="button button-red"
+    id="disabled-button1"
+    (click)="pushedButton('red')"
+  >
+    <div class="outer">
+      <div class="height">
+        <div class="inner"><span class="non-draggable">FIGHT</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="button button-green" (click)="pushedButton('green')">
+    <div class="outer">
+      <div class="height">
+        <div class="inner" style="line-height: 1em !important">
+          <span
+            style="
+              font-size: 20px;
+              font-weight: bold;
+              line-height: 1em;
+              font-stretch: extra-condensed;
+            "
+            ><span class="non-draggable">{{
+              algorythmsMan
+                ? "nah bro, let me back to game"
+                : "Pick a question on algoExpert (dot) io"
+            }}</span></span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="button button-blue"
+    id="disabled-button2"
+    (click)="pushedButton('blue')"
+  >
+    <div class="outer">
+      <div class="height">
+        <div class="inner"><span class="non-draggable">EVOLVE</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING SPINNER -->
+<div class="loading-spinner-box non-draggable">
+  <div *ngIf="(!warrior1Ready && clicked && !algorythmsMan) || (!warrior2Ready && warrior2Called && warrior1Ready && !algorythmsMan) " class="loader"></div>
+</div>

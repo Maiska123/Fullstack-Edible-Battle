@@ -11,6 +11,7 @@ public interface IVeggieCacheService {
     public void InsertVeggieUrlWithName (string name, string url);
 
     public void InsertVeggieBytesWithName (string name, byte[] bytes);
+    public void InsertVeggieStatsWithId (int id, WarriorStatModel stats);
 }
 public class VeggieCacheService : IVeggieCacheService {
     public static VeggieCacheService? singletonInstance;
@@ -29,7 +30,7 @@ public class VeggieCacheService : IVeggieCacheService {
     private static VeggieStashModel VeggieCache = new ();
 
     public Task<byte[]> GetVeggieStreamByName (string veggieName) {
-        return Task.FromResult(VeggieCache.VeggieBytesByName (veggieName));
+        return Task.FromResult (VeggieCache.VeggieBytesByName (veggieName));
     }
 
     public bool veggieExists (string name) {
@@ -37,7 +38,8 @@ public class VeggieCacheService : IVeggieCacheService {
     }
 
     public int getUsageCountByName (string name) {
-        return VeggieCache.GetVeggieByName (name).UseVeggie;
+        if (VeggieCache.VeggieExists (name)) return VeggieCache.GetVeggieByName (name).UseVeggie;
+        return -1;
     }
 
     public Task<string> GetAllVeggiesAsString () {
@@ -73,6 +75,12 @@ public class VeggieCacheService : IVeggieCacheService {
 
     public void InsertVeggieBytesWithName (string name, byte[] bytes) {
         VeggieCache.AddVeggieBytesByName (name, bytes);
+    }
+
+    public void InsertVeggieStatsWithId (int id, WarriorStatModel stats) {
+        // This seems like unneccessary step but ModelBinding breaks if this wasn't the case
+    	stats.Name =  System.Uri.UnescapeDataString(stats.Name);
+        VeggieCache.addVeggieStatsbyName (stats);
     }
 
 }

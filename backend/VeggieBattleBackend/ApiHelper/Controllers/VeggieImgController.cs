@@ -27,9 +27,15 @@ public class VeggieImgController : ControllerBase {
     [Produces(System.Net.Mime.MediaTypeNames.Image.Jpeg)]
     public IActionResult GetVeggieImg (string veggieName)
     {
+        
         if (_cacheService.veggieExists (veggieName)) {
-            return File((_imgProcessor.getPreviousImg (veggieName)).Result, MediaTypeNames.Image.Jpeg, $"{veggieName}.jpeg");
+            if ((_imgProcessor.getPreviousImg (veggieName) is not null))
+            {
+                return File((_imgProcessor.getPreviousImg (veggieName)).Result, MediaTypeNames.Image.Jpeg, $"{veggieName}.jpeg");
+            }
+            return NotFound();
         }
+        Console.WriteLine("Started Creating a new Veggie");
         _imgProcessor.newCounter (veggieName);
 
         // Store array of veggie names and give veggie and 1 from 4 available slots
@@ -45,8 +51,9 @@ public class VeggieImgController : ControllerBase {
     }
 
     [HttpGet ("utils/waiting/counter/{name}")]
-    public OkObjectResult GetWaitingCounter (string name) {
-        return Ok (_imgProcessor.getCountable (name));
+    public IActionResult GetWaitingCounter (string name) {
+        var counter = _imgProcessor.getCountable (name);
+        return counter is not null ? Ok (counter) : NotFound();
     }
 
     [HttpGet ("utils/counter/{name}")]
