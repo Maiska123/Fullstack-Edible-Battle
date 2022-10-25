@@ -1,4 +1,4 @@
 {
-  "apiUri": "https://localhost:7220",
+  "apiUri": "http://localhost:5000",
   "offline": true
 }
