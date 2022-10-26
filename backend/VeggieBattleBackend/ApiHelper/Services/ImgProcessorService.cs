@@ -53,35 +53,45 @@ public class ImgProcessorService : IImgProcessorService {
         return _cacheService.GetVeggieStreamByName (veggieName);
     }
     public Task<byte[]> LoadAIGeneratedImg (string queryText = "questionmark") {
-        _cacheService.InsertNewVeggieWithName (queryText);
 
-        addToCounter (queryText);
 
-        DeepAI_API api = new DeepAI_API (apiKey: _configuration.GetValue<string>("DeepAIApiKey"));
-
-        addToCounter (queryText);
-
-        StandardApiResponse resp = api.callStandardApi ("text2img", new {
-            text = queryText,
-        });
-
-        addToCounter (queryText);
-
-        // Console.Write(api.objectAsJsonString(resp));
-
-        if (api.objectAsJsonString (resp).Length > 1) {
-
-            ImgModel? img = JsonSerializer.Deserialize<ImgModel> (api.objectAsJsonString (resp));
+        try {
+            _cacheService.InsertNewVeggieWithName (queryText);
 
             addToCounter (queryText);
 
-            _cacheService.InsertVeggieUrlWithName (queryText, img.OutputUrl);
+            DeepAI_API api = new DeepAI_API (apiKey: _configuration["DEEPAI_APIKEY"]);
 
-            return DownloadImageFromUrl (img.OutputUrl, queryText);
-        } else {
+            addToCounter (queryText);
+
+            StandardApiResponse resp = api.callStandardApi ("text2img", new {
+                text = queryText,
+            });
+
+            addToCounter (queryText);
+            // Console.Write(api.objectAsJsonString(resp));
+
+            if (api.objectAsJsonString (resp).Length > 1) {
+
+                ImgModel? img = JsonSerializer.Deserialize<ImgModel> (api.objectAsJsonString (resp));
+
+                addToCounter (queryText);
+
+                _cacheService.InsertVeggieUrlWithName (queryText, img.OutputUrl);
+
+                return DownloadImageFromUrl (img.OutputUrl, queryText);
+            } else {
+
+                // palauta placeholder img.jpg frontendissä
+                maxCounter (queryText);
+                throw new Exception (api.ToString ());
+            }
+
+        } catch (Exception e) {
             maxCounter (queryText);
-            throw new Exception (api.ToString ());
+            throw new Exception ($"Possibly error with apikey for image generation, error msg :{e}");
         }
+
 
     }
 
