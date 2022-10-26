@@ -64,6 +64,13 @@ export class GameStatsService {
         this._observables$[0].getValue().data.next(this._RndNr);
       }, 1000);
 
+      this.observables$.push(
+        new BehaviorSubject<IDebugStat>(<IDebugStat>{
+          name: 'Currently Playing',
+          data: new BehaviorSubject('null'),
+        })
+      );
+
       this.statsService.getRandomContestant()
       .subscribe({
         next: (randomOne: IContestantStats) => {

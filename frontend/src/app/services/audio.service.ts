@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { HowlerPlayer } from '../utils/HowlerPlayer';
 
 @Injectable({
@@ -8,13 +9,12 @@ export class AudioService {
 
 bgMusicPlaying: boolean = false;
 bgMusicPlayer!: HowlerPlayer;
+public currentlyPlaying$: BehaviorSubject<string> = new BehaviorSubject<string>('null');
 
 public viewDidLoad(twitchMode: boolean = false) {
 
   this.bgMusicPlayer =
   twitchMode ? new HowlerPlayer([
-    "assets/audio/crickets.mp3",
-    "assets/audio/crickets.mp3",
     "assets/audio/crickets.mp3",
     "assets/audio/crickets.mp3",
   ])
@@ -23,21 +23,29 @@ public viewDidLoad(twitchMode: boolean = false) {
     "assets/audio/battleBG8.mp3",
     "assets/audio/battleBG9.mp3",
     "assets/audio/battleBG10.mp3",
-    "assets/audio/ff7battle.mp3",
     "assets/audio/pokemonvswild.mp3",
     "assets/audio/ff7battle.mp3",
-    "assets/audio/pokemongymbattle.mp3",
     "assets/audio/battleBG1.mp3",
     "assets/audio/battleBG2.mp3",
     "assets/audio/battleBG3.mp3",
     "assets/audio/battleBG4.mp3",
+    "assets/audio/pokemongymbattle.mp3",
     "assets/audio/battleBG5.mp3",
     "assets/audio/battleBG6.mp3",
   ]);
 
+  this.bgMusicPlayer.currentlyPlaying$.subscribe((value) => {
+    this.currentlyPlaying$.next(value);
+
+  })
+
 }
 
-constructor() { }
+constructor() {
+
+
+ }
+
 
 playTextSound(){
   this.bgMusicPlayer.playTextSound();

@@ -25,7 +25,7 @@ export class HowlerPlayer {
   private _sprites!: Howl;
   private _textSprites!: Howl;
   private _index: number;
-
+  public currentlyPlaying$: Subject<string> = new Subject<string>();
   private $progress: Subject<SoundProgressInterface>;
   private _OkSprites: Howl;
 
@@ -122,6 +122,7 @@ export class HowlerPlayer {
       howl.fade(0, 1, 200);
       howl.play();
     }
+    this.currentlyPlaying$.next(sound.sourceUrl.match('\/(?!audio\/)(([a-z]).*)\..*')![0].replace('/',''));
   }
 
   /** */
@@ -174,6 +175,8 @@ export class HowlerPlayer {
   /***/
   public skipTo(index: number) {
     if (!index || index > this._sounds.length) index = 0;
+
+    this.currentlyPlaying$.next(this._sounds[index].sourceUrl.match('\/(?!audio\/)(([a-z]).*)\..*')![0].replace('/',''));
 
     this.play(index);
   }

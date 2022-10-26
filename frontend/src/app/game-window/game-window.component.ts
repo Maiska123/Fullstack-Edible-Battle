@@ -57,6 +57,7 @@ export enum BattleState{
   warrior2Attacking,
   dialogTextInput,
   waitingForUser,
+  nextOpponentIncoming
 }
 
 export interface BattleStatWithDescription{
@@ -163,6 +164,9 @@ export class GameWindowComponent implements OnInit {
   private lastRemaining2: number = 0;
   public gameOver: boolean = false;
   private hpLoss: number = 0;
+  haveSeenEnd: any;
+  warrior1haswon: boolean = false;
+  warrior1Won: boolean = false;
 
   constructor(
     private gameStatsService: GameStatsService,
@@ -181,6 +185,14 @@ export class GameWindowComponent implements OnInit {
     this.dialogSubject.subscribe((text) => {
       this.dialogText = text;
     });
+
+    this.audioService.currentlyPlaying$.subscribe((value) => {
+      this.gameStatsService.observables$.find((x) => x.value.name == 'Currently Playing')?.next({
+        name: 'Currently Playing',
+        data: new BehaviorSubject(value),
+      }
+      );
+    })
   }
 
   ngOnInit(): void {
@@ -213,6 +225,7 @@ export class GameWindowComponent implements OnInit {
         });
     }
   }
+
   private dialogTextInputEffect(
     text: string,
     textAt: number = 0,
@@ -341,13 +354,13 @@ export class GameWindowComponent implements OnInit {
 
   private warrior1Hits(amount: number) {
     this.battleQueue.push({state: BattleState.warrior1Attacking,message: amount.toFixed(0)});
-    this.battleQueue.push({state: BattleState.dialogTextInput,message: `${this.warrior2Name} says: Ouch!`});
+    // this.battleQueue.push({state: BattleState.dialogTextInput,message: `${this.warrior2Name} says: Ouch!`});
     this.attackQueue.push({state: AttackTurn.warrior1Attacked });
   }
 
   private warrior2Hits(amount: number) {
     this.battleQueue.push({state: BattleState.warrior2Attacking,message: amount.toFixed(0),});
-    this.battleQueue.push({state: BattleState.dialogTextInput,message: `${this.warrior1Name} says: Ouwie!`});
+    // this.battleQueue.push({state: BattleState.dialogTextInput,message: `${this.warrior1Name} says: Ouwie!`});
     this.attackQueue.push({state: AttackTurn.warrior2Attacked });
 
   }
@@ -361,17 +374,14 @@ export class GameWindowComponent implements OnInit {
     let remaining1 =
       100 -
       this.warrior1Stats.speed *
-        /*Luck Factor*/ ((Math.floor(Math.random() * this.warrior1Stats.luck) +
-          1) /
-          10) +
-      (this.lastRemaining1 - this.warrior1Stats.luck);
+        /*Luck Factor*/ ((Math.floor(Math.random() * (Math.ceil(this.warrior1Stats.luck))) +1) /10) +
+      (this.lastRemaining1 - (Math.ceil(this.warrior1Stats.luck)));
+
     let remaining2 =
       100 -
       this.warrior2Stats.speed *
-        /*Luck Factor*/ ((Math.floor(Math.random() * this.warrior2Stats.luck) +
-          1) /
-          10) +
-      (this.lastRemaining2 - this.warrior2Stats.luck);
+        /*Luck Factor*/ ((Math.floor(Math.random() * (Math.ceil(this.warrior2Stats.luck))) + 1) /10) +
+      ((this.lastRemaining2 - (Math.ceil(this.warrior2Stats.luck))) % 100);
 
 
     console.log(['this.lastRemaining1',this.lastRemaining1]);
@@ -379,8 +389,8 @@ export class GameWindowComponent implements OnInit {
     console.log(['remaining1',remaining1]);
     console.log(['remaining2',remaining2]);
 
-    this.lastRemaining1 = remaining1;
-    this.lastRemaining2 = remaining2;
+    this.lastRemaining1 = (remaining1 % 100);
+    this.lastRemaining2 = (remaining2 % 100);
 
     // while (this.warrior1Stats.hp > 0 && this.warrior2Stats.hp > 0) {
 
@@ -405,33 +415,34 @@ export class GameWindowComponent implements OnInit {
       }
     }
 
-    if ( (!inequalityInBattle && remaining1 < remaining2) || (inequalityInBattle && warrior1Chance) ) {
-      // warrior 1 deals damage
-      let damage =
-        (this.warrior1Stats.attack / this.warrior2Stats.hp) *
-          this.warrior1Stats.attack *
-          this.warrior1Stats.luck -
-        ((this.warrior2Stats.defence/10) * this.warrior2Stats.luck) /
-          this.warrior2Stats.hp;
-      this.warrior1Hits(damage < 1 ? 1 : Math.ceil(damage));
-    } else {
-      // warrior 2 deals damage
-      let damage =
-        (this.warrior2Stats.attack / this.warrior1Stats.hp) *
-          this.warrior2Stats.attack *
-          this.warrior2Stats.luck -
-        ((this.warrior1Stats.defence/10) * this.warrior1Stats.luck) /
-          this.warrior1Stats.hp;
-      this.warrior2Hits(damage < 1 ? 1 : Math.ceil(damage));
+    if (!this.gameOver) {
+      if ( (!inequalityInBattle && remaining1 < remaining2)
+      || (inequalityInBattle && warrior1Chance)
+      ) {
+        // warrior 1 deals damage
+        let damage =
+          (this.warrior1Stats.attack / this.warrior2Stats.hp) *
+            this.warrior1Stats.attack *
+            (Math.ceil(this.warrior1Stats.luck)) -
+          ((this.warrior2Stats.defence/10) * (Math.ceil(this.warrior2Stats.luck))) /
+            this.warrior2Stats.hp;
+        this.warrior1Hits(damage < 1 ? 1 : (Math.ceil(damage)*10));
+      } else {
+        // warrior 2 deals damage
+        let damage =
+          (this.warrior2Stats.attack / this.warrior1Stats.hp) *
+            this.warrior2Stats.attack *
+            (Math.ceil(this.warrior2Stats.luck)) -
+          ((this.warrior1Stats.defence/10) * (Math.ceil(this.warrior1Stats.luck))) /
+            this.warrior1Stats.hp;
+        this.warrior2Hits(damage < 1 ? 1 : (Math.ceil(damage)*10));
+      }
+      // }
     }
-    // }
 
     this.heroHpAmount = this.warrior1Stats.hp;
     this.enemyHpAmount = this.warrior2Stats.hp;
 
-    if (this.warrior1Stats.hp < 0 || this.warrior2Stats.hp < 0) {
-      this.gameOver = true;
-    }
   }
 
   /**
@@ -451,11 +462,12 @@ export class GameWindowComponent implements OnInit {
 
     // }
 
+
     let gameState;
 
     if (
-      (this.currentGameState == undefined || !this.battleQueue[0]) &&
-      this.gameOver
+      (this.currentGameState == undefined || !this.battleQueue[0])
+       && this.haveSeenEnd
     ) {
       this.battleQueue.push({
         state: BattleState.dialogTextInput,
@@ -464,7 +476,7 @@ export class GameWindowComponent implements OnInit {
       this.booleanFactor = !this.booleanFactor;
 
       gameState = this.battleQueue.shift();
-    } else if (this.gameOver) {
+    } else if (this.gameOver  && this.haveSeenEnd) {
       this.battleQueue.push({
         state: BattleState.dialogTextInput,
         message:
@@ -476,12 +488,30 @@ export class GameWindowComponent implements OnInit {
       gameState = this.battleQueue[0];
     }
 
+    if (gameState?.state == BattleState.nextOpponentIncoming)
+    {
+      this.dialogTextInput(
+        `${gameState.message}`,
+        false
+      );
+        this.warrior2Called = true;
+        this.warrior2Ready = false;
+        this.battleHasStarted = false;
+        this.battleQueueStatus = QueueStatus.waitingForUser;
+
+        this.addAnotherContestant();
+
+    }
+
     if (
       gameState?.state != BattleState.warrior1Attacking &&
-      gameState?.state != BattleState.warrior2Attacking
+      gameState?.state != BattleState.warrior2Attacking &&
+      gameState?.state != BattleState.nextOpponentIncoming
+
     ) {
       this.battleCalculations();
     }
+
 
     console.table(gameState);
     console.table(this.battleQueueStatus);
@@ -529,13 +559,24 @@ export class GameWindowComponent implements OnInit {
 
       setTimeout(() => {
         this.warrior2Stats.hp -= this.hpLoss;
-      }, 1500);
+      }, 500);
 
       this.dialogTextInput(
         `Our hero did ${gameState.message} damage to opponent!`,
         false
       );
+      if ((this.warrior2Stats.hp < 0) && !this.warrior1Won) {
+        this.battleQueue.push({
+          state: BattleState.nextOpponentIncoming,
+          message: 'New Rival incoming!',
+        });
+        this.warrior1Won = true;
+      }
       advance = true;
+
+      if ((this.warrior1Stats.hp < 0 )) {
+        this.gameOver = true;
+      }
     }
     if (gameState?.state == BattleState.warrior2Attacking) {
       // BATTLE ANIMATION!
@@ -544,7 +585,7 @@ export class GameWindowComponent implements OnInit {
 
       setTimeout(() => {
         this.warrior1Stats.hp -= this.hpLoss;
-      }, 1500);
+      }, 500);
 
       this.dialogTextInput(
         `Opponent did ${gameState.message} damage to our hero!`,
@@ -552,6 +593,9 @@ export class GameWindowComponent implements OnInit {
       );
       // this.battleQueue.push({ state: BattleState.dialogTextInput,message:`Opponent did ${gameState.message} damage to our hero!`});
       advance = true;
+      if ((this.warrior1Stats.hp < 0 )) {
+        this.gameOver = true;
+      }
     }
     if (gameState?.state == BattleState.waitingForUser) {
     }
@@ -622,12 +666,24 @@ export class GameWindowComponent implements OnInit {
         this.startBattle();
       } else if (
         this.battleQueueStatus == QueueStatus.waitingForUser &&
-        this.battleHasStarted
+        this.battleHasStarted && !this.gameOver
       ) {
         // in battle
         console.log('in battle');
 
         this.calculateAndAdvanceBattle();
+      } else if (this.gameOver) {
+        if (!this.haveSeenEnd) {
+
+          this.pushedButton('green');
+        } else {
+          this.calculateAndAdvanceBattle();
+          let word = `Game has ended. You ${this.warrior1Stats.hp < this.warrior2Stats.hp ? 'lost' : 'won'}.`
+          setTimeout(() => {
+            this.dialogTextInput(word, false);
+            this.haveSeenEnd = true;
+          }, 1000);
+        }
       }
     }
   }
@@ -655,8 +711,8 @@ export class GameWindowComponent implements OnInit {
             this.audioService.playOkSound();
             this.addAnotherContestant();
           } else if (
-            this.battleQueueStatus == QueueStatus.waitingForUser ||
-            this.battleQueueStatus == QueueStatus.started
+            ( this.battleQueueStatus == QueueStatus.waitingForUser ||
+            this.battleQueueStatus == QueueStatus.started ) || (!this.haveSeenEnd && this.gameOver)
           ) {
             console.log('BattleAdvanced');
             this.advanceBattle();
@@ -686,27 +742,35 @@ export class GameWindowComponent implements OnInit {
   }
 
   public wannaBeAlgoExpert() {
-    if (this.algorythmsMan) {
-      VideoPlayerComponent.videoShow = false;
 
-      VideoPlayerComponent.powerSwitch();
+    if (!this.gameOver) {
+      if (this.algorythmsMan) {
+        VideoPlayerComponent.videoShow = false;
 
-      setTimeout(() => {
-        this.algorythmsMan = false;
-        this.audioService.bringTheBeatBack();
+        VideoPlayerComponent.powerSwitch();
 
-        document
-          .getElementById('disabled-button1')
-          ?.removeAttribute('disabled');
-        if (!(this.warrior1EvolveStage == 3))
+        setTimeout(() => {
+          this.algorythmsMan = false;
+          this.audioService.bringTheBeatBack();
+
           document
-            .getElementById('disabled-button2')
+            .getElementById('disabled-button1')
             ?.removeAttribute('disabled');
-      }, 500);
+          if (!(this.warrior1EvolveStage == 3))
+            document
+              .getElementById('disabled-button2')
+              ?.removeAttribute('disabled');
+        }, 500);
+      }
     }
+
     this.algorythmsMan = true;
 
-    this.audioService.dimBGMusic();
+    if (this.gameOver) {
+      this.audioService.bgMusicPlayer.stop() ;
+    document.getElementById('disabled-button3')?.setAttribute('disabled', '');
+
+    } else this.audioService.dimBGMusic();
 
     document.getElementById('disabled-button1')?.setAttribute('disabled', '');
     document.getElementById('disabled-button2')?.setAttribute('disabled', '');
@@ -740,7 +804,7 @@ export class GameWindowComponent implements OnInit {
 
     this.activateLoadingBar();
 
-    if (new Date().getTime() - this.lastFetchedCounter.getTime() > 5000) {
+    if ((new Date().getTime()) - this.lastFetchedCounter.getTime() > 1000) {
       this.imageService.getImageGenerationCounterByName(name).subscribe({
         next: (counterData: IWaitingCounter) => {
           this.counterData1 = counterData;
@@ -818,8 +882,7 @@ export class GameWindowComponent implements OnInit {
       );
     else {
       this.loadingbar.style.width =
-        (this.loadingPercentage * 6 * 170.66 + this.accumulator).toFixed(0) +
-        'px'; // 10,24
+        (this.loadingPercentage * 6 * 170.66 + this.accumulator).toFixed(0) +'px'; // 10,24
     }
     // if (this.loadingPercentage >= 1 || this.counterData1.counterMax == this.counterData1.counterValue) clearInterval(this.timer);
   }
@@ -858,12 +921,21 @@ export class GameWindowComponent implements OnInit {
     this.warrior2Called = true;
     this.contestantService.getRandomContestant().subscribe({
       next: (randomOne: IContestantStats) => {
-        this.gameStatsService.observables$.push(
-          new BehaviorSubject<IDebugStat>(<IDebugStat>{
-            name: 'Opposing Veggie',
-            data: new BehaviorSubject(randomOne),
-          })
-        );
+        if (!this.gameStatsService.observables$.find((x) => x.value.name == 'Opposing Veggie')){
+          this.gameStatsService.observables$.push(
+            new BehaviorSubject<IDebugStat>(<IDebugStat>{
+              name: 'Opposing Veggie',
+              data: new BehaviorSubject(randomOne),
+            })
+          );
+        } else {
+          this.gameStatsService.observables$.find((x) => x.value.name == 'Opposing Veggie')?.next(
+            {
+              name: 'Opposing Veggie',
+              data: new BehaviorSubject(randomOne),
+            }
+          )
+        }
       },
       error: (err: HttpErrorResponse) => {
         console.error(err.status, err);
@@ -924,7 +996,7 @@ export class GameWindowComponent implements OnInit {
                         this.battleQueueStatus = QueueStatus.started;
                       let message = `Enemy Contestant enters the battlefield... Say hello to ${this.warrior2Name}!`;
 
-                      if (this.warrior2Ready)
+                      if (this.warrior2Ready && this.warrior1Ready)
                         this.battleQueue.push({
                           state: BattleState.dialogTextInput,
                           message: message,
@@ -961,7 +1033,9 @@ export class GameWindowComponent implements OnInit {
               }
             };
           },
-          complete: () => {},
+          complete: () => {
+            this.startBattle();
+          },
         });
       });
   }

@@ -49,8 +49,6 @@ export class HealthBoxComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    if (this.isEnemy) document.getElementById('health-amount-enemy')!.style.width = ((this.amount / this.maxAmount) * 100).toFixed(0)+'%';
-    else document.getElementById('health-amount-hero')!.style.width = ((this.amount / this.maxAmount) * 100).toFixed(0)+'%';
 
   }
 
@@ -60,6 +58,10 @@ export class HealthBoxComponent implements OnInit {
     setTimeout(() => {
        this.isOpen = true;
     }, 2000);
+
+    if (this.isEnemy) document.getElementById('health-amount-enemy')!.style.width = ((this.amount / this.maxAmount) * 100).toFixed(0)+'%';
+    else document.getElementById('health-amount-hero')!.style.width = ((this.amount / this.maxAmount) * 100).toFixed(0)+'%';
+
   }
 
   public displayHp(currentHp: number){
