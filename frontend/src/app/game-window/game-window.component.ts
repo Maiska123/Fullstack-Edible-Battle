@@ -84,33 +84,35 @@ export class GameWindowComponent implements OnInit {
   canvas!: HTMLCanvasElement;
   c!: CanvasRenderingContext2D | null;
   clicked: boolean = false;
-  bitmapCache!: ImageBitmap;
-  bitmapCache2!: ImageBitmap;
+  public bitmapCache!: ImageBitmap;
+  public bitmapCache2!: ImageBitmap;
   readonly failoverCounter: number = 3;
   lastFetchedCounter: Date = new Date();
   accumulator: number = 1;
   private adjectivesToStart: string[] = ["angry","bold","brutal","cutthroat","dangerous","ferocious","fiery","furious","intense","murderous","passionate","powerful","raging","relentless","savage","stormy","strong","terrible","vehement","vicious","animal","ape","awful","barbarous","bloodthirsty","blustery","boisterous","brutish","cruel","enraged","fell","feral","flipped","frightening","horrible","howling","impetuous","infuriated","malevolent","malign","primitive","raving","tempestuous","threatening","tigerish","truculent","tumultous/tumultuous","uncontrollable","untamed","venomous","wild"];
 
   counterData1!: IWaitingCounter;
-  warrior1Image: IWarriorSprite = {
+
+  warrior1Sprite: IWarriorSprite = {
     img: null,
-    x: 0,
-    y: 0,
-    width: 28,
-    height: 42,
+    x: 200,
+    y: 220,
+    width: 250,
+    height: 250,
     currentframe: 0,
     totalframes: 0,
   };
 
-  warrior2Image: IWarriorSprite = {
+  warrior2Sprite: IWarriorSprite = {
     img: null,
-    x: 0,
-    y: 0,
-    width: 28,
-    height: 42,
+    x: 700,
+    y: 60,
+    width: 150,
+    height: 150,
     currentframe: 0,
     totalframes: 0,
   };
+
   warrior1Stats!: IContestantStats;
   warrior2Stats!: IContestantStats;
 
@@ -164,9 +166,16 @@ export class GameWindowComponent implements OnInit {
   private lastRemaining2: number = 0;
   public gameOver: boolean = false;
   private hpLoss: number = 0;
-  haveSeenEnd: any;
-  warrior1haswon: boolean = false;
-  warrior1Won: boolean = false;
+  public haveSeenEnd: any;
+  public warrior1haswon: boolean = false;
+  public warrior1Won: boolean = false;
+  public x: number = 50;
+  public y: number = 50;
+  public lastRender: number = Date.now();
+  public renderCalled: boolean = false;
+  public animationInterval: NodeJS.Timer | undefined;
+  public backgroundImage: HTMLImageElement | undefined;
+  public heroAttacking: boolean = true;
 
   constructor(
     private gameStatsService: GameStatsService,
@@ -354,13 +363,13 @@ export class GameWindowComponent implements OnInit {
 
   private warrior1Hits(amount: number) {
     this.battleQueue.push({state: BattleState.warrior1Attacking,message: amount.toFixed(0)});
-    // this.battleQueue.push({state: BattleState.dialogTextInput,message: `${this.warrior2Name} says: Ouch!`});
+    this.battleQueue.push({state: BattleState.waitingForUser,message: `${this.warrior2Name} says: Ouch!`});
     this.attackQueue.push({state: AttackTurn.warrior1Attacked });
   }
 
   private warrior2Hits(amount: number) {
     this.battleQueue.push({state: BattleState.warrior2Attacking,message: amount.toFixed(0),});
-    // this.battleQueue.push({state: BattleState.dialogTextInput,message: `${this.warrior1Name} says: Ouwie!`});
+    this.battleQueue.push({state: BattleState.waitingForUser,message: `${this.warrior1Name} says: Ouwie!`});
     this.attackQueue.push({state: AttackTurn.warrior2Attacked });
 
   }
@@ -488,20 +497,7 @@ export class GameWindowComponent implements OnInit {
       gameState = this.battleQueue[0];
     }
 
-    if (gameState?.state == BattleState.nextOpponentIncoming)
-    {
-      this.dialogTextInput(
-        `${gameState.message}`,
-        false
-      );
-        this.warrior2Called = true;
-        this.warrior2Ready = false;
-        this.battleHasStarted = false;
-        this.battleQueueStatus = QueueStatus.waitingForUser;
 
-        this.addAnotherContestant();
-
-    }
 
     if (
       gameState?.state != BattleState.warrior1Attacking &&
@@ -559,7 +555,7 @@ export class GameWindowComponent implements OnInit {
 
       setTimeout(() => {
         this.warrior2Stats.hp -= this.hpLoss;
-      }, 500);
+      }, 1100);
 
       this.dialogTextInput(
         `Our hero did ${gameState.message} damage to opponent!`,
@@ -585,7 +581,7 @@ export class GameWindowComponent implements OnInit {
 
       setTimeout(() => {
         this.warrior1Stats.hp -= this.hpLoss;
-      }, 500);
+      }, 1100);
 
       this.dialogTextInput(
         `Opponent did ${gameState.message} damage to our hero!`,
@@ -598,12 +594,36 @@ export class GameWindowComponent implements OnInit {
       }
     }
     if (gameState?.state == BattleState.waitingForUser) {
+
+      if (this.attackQueue.at(-1)?.state == AttackTurn.warrior1Attacked){
+        this.animateAttackWarrior1();
+      } else {
+        this.animateAttackWarrior2();
+      }
+      advance = true
+    }
+    if (gameState?.state == BattleState.nextOpponentIncoming)
+    {
+      this.dialogTextInput(
+        `${gameState.message}`,
+        false
+      );
+        this.warrior2Called = false;
+        this.warrior2Ready = false;
+        this.battleHasStarted = false;
+        this.battleQueueStatus = QueueStatus.calculating;
+        this.warrior2Stats.hp = 1;
+        this.battleQueue = [];
+        this.attackQueue = [];
+        this.addAnotherContestant();
+
     }
 
     if (advance) this.currentGameState = this.battleQueue.shift();
 
     // this.battleQueueStatus = QueueStatus.waitingForUser; // always ends at waiting for user
   }
+
 
   public startBattle() {
     this.battleQueue.push({
@@ -615,6 +635,8 @@ export class GameWindowComponent implements OnInit {
 
     this.heroHpAmount = this.warrior1Stats.hp;
     this.enemyHpAmount = this.warrior2Stats.hp;
+
+    this.warrior1Won = false;
 
     if (this.warrior1Stats.attack == 0) this.warrior1Stats.attack = 1;
     if (this.warrior2Stats.attack == 0) this.warrior2Stats.attack = 1;
@@ -682,7 +704,7 @@ export class GameWindowComponent implements OnInit {
           setTimeout(() => {
             this.dialogTextInput(word, false);
             this.haveSeenEnd = true;
-          }, 1000);
+          }, 500);
         }
       }
     }
@@ -707,7 +729,7 @@ export class GameWindowComponent implements OnInit {
           }, 2000);
         } else {
           // all the rest
-          if (!this.warrior2Ready && !this.warrior2Called) {
+          if (!this.warrior2Ready && !this.warrior2Called && !this.warrior1Won) {
             this.audioService.playOkSound();
             this.addAnotherContestant();
           } else if (
@@ -918,35 +940,37 @@ export class GameWindowComponent implements OnInit {
   }
 
   public addAnotherContestant() {
-    this.warrior2Called = true;
-    this.contestantService.getRandomContestant().subscribe({
-      next: (randomOne: IContestantStats) => {
-        if (!this.gameStatsService.observables$.find((x) => x.value.name == 'Opposing Veggie')){
-          this.gameStatsService.observables$.push(
-            new BehaviorSubject<IDebugStat>(<IDebugStat>{
-              name: 'Opposing Veggie',
-              data: new BehaviorSubject(randomOne),
-            })
+    if (!this.warrior2Called) {
+      this.warrior2Called = true;
+      this.contestantService.getRandomContestant().subscribe({
+        next: (randomOne: IContestantStats) => {
+          if (!this.gameStatsService.observables$.find((x) => x.value.name == 'Opposing Veggie')){
+            this.gameStatsService.observables$.push(
+              new BehaviorSubject<IDebugStat>(<IDebugStat>{
+                name: 'Opposing Veggie',
+                data: new BehaviorSubject(randomOne),
+              })
+            );
+          } else {
+            this.gameStatsService.observables$.find((x) => x.value.name == 'Opposing Veggie')?.next(
+              {
+                name: 'Opposing Veggie',
+                data: new BehaviorSubject(randomOne),
+              }
+            )
+          }
+        },
+        error: (err: HttpErrorResponse) => {
+          console.error(err.status, err);
+        },
+        complete: () => {
+          this.contestantService.changes.next(
+            !this.contestantService.changes.getValue()
           );
-        } else {
-          this.gameStatsService.observables$.find((x) => x.value.name == 'Opposing Veggie')?.next(
-            {
-              name: 'Opposing Veggie',
-              data: new BehaviorSubject(randomOne),
-            }
-          )
-        }
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error(err.status, err);
-      },
-      complete: () => {
-        this.contestantService.changes.next(
-          !this.contestantService.changes.getValue()
-        );
-        this.drawOpposingVeggie();
-      },
-    });
+          this.drawOpposingVeggie();
+        },
+      });
+    }
   }
 
   public drawOpposingVeggie() {
@@ -1034,7 +1058,7 @@ export class GameWindowComponent implements OnInit {
             };
           },
           complete: () => {
-            this.startBattle();
+            // this.startBattle();
           },
         });
       });
@@ -1153,6 +1177,7 @@ export class GameWindowComponent implements OnInit {
           image.src = 'assets/battleBackground.png';
 
           image.onload = () => {
+            this.backgroundImage = image;
             setTimeout(() => {
               if (this.c) this.c.drawImage(image, 0, 0);
             }, 1000);
@@ -1165,7 +1190,146 @@ export class GameWindowComponent implements OnInit {
     }
   }
 
-  public animateBattle() {
-    window.requestAnimationFrame(this.animateBattle);
+  public render() {
+
+      let delta = Date.now() - this.lastRender;
+      this.x += delta;
+      this.y += delta;
+      this.c!.fillStyle = 'black';
+      this.c!.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.c!.drawImage(this.backgroundImage!,0,0,this.canvas.width,this.canvas.height);
+      /* Animations
+       */
+      if (this.heroAttacking){
+        this.warrior1AttackingSpritesUpdate();
+        this.warrior1AttackingSpritesDraw();
+        this.c!.drawImage(this.bitmapCache2, 700, 60);
+      } else {
+        this.warrior2AttackingSpritesUpdate();
+        this.warrior2AttackingSpritesDraw();
+        this.c!.drawImage(this.bitmapCache, 200, 220);
+      }
+
+      if (this.renderCalled) window.requestAnimationFrame(() => this.render());
   }
+
+  private warrior1AttackingSpritesUpdate() {
+    /* Päivitetään liikehdintä muuttujasta this.warrior1Sprite
+        x: 200,
+        y: 220,
+        width: 250,
+        height: 250,
+     */
+    if (this.warrior1Sprite.currentframe < 50){
+      if (this.warrior1Sprite.x > 150) this.warrior1Sprite.x--;
+
+    } else if (this.warrior1Sprite.currentframe >= 50 &&
+                this.warrior1Sprite.currentframe < 200 ) {
+      if (this.warrior1Sprite.x < 190) this.warrior1Sprite.x += 3;
+      if (this.warrior1Sprite.y < 200) this.warrior1Sprite.y += 3;
+
+    } else if (this.warrior1Sprite.currentframe >= 200 &&
+                this.warrior1Sprite.currentframe < 350 ) {
+      if (this.warrior1Sprite.x > 200) this.warrior1Sprite.x -= 3;
+      if (this.warrior1Sprite.y < 220) this.warrior1Sprite.y += 3;
+      }
+    console.table([
+      this.warrior1Sprite.currentframe,
+      this.warrior1Sprite.x,
+      this.warrior1Sprite.y]);
+
+    this.warrior1Sprite.currentframe++;
+
+  }
+  private warrior1AttackingSpritesDraw() {
+    /* Piirretään liikehdintä muuttujasta this.warrior1Sprite
+     */
+    this.c!.drawImage(this.bitmapCache, this.warrior1Sprite.x, this.warrior1Sprite.y);
+
+  }
+
+  private warrior2AttackingSpritesUpdate() {
+    /* Päivitetään liikehdintä muuttujasta this.warrior2Sprite
+        x: 700,
+        y: 60,
+        width: 150,
+        height: 150,
+     */
+        if (this.warrior2Sprite.currentframe < 25){
+          if (this.warrior2Sprite.x < 730) this.warrior2Sprite.x++;
+        } else if (this.warrior2Sprite.currentframe >= 25 &&
+                    this.warrior2Sprite.currentframe < 200 ) {
+          if (this.warrior2Sprite.x > 600) this.warrior2Sprite.x -= 3;
+          if (this.warrior2Sprite.y < 150) this.warrior2Sprite.y += 3;
+        } else if (this.warrior2Sprite.currentframe >= 200 &&
+                    this.warrior2Sprite.currentframe < 350 ) {
+          if (this.warrior2Sprite.x < 700) this.warrior2Sprite.x += 3;
+          if (this.warrior2Sprite.y > 60) this.warrior2Sprite.y -= 3;
+          }
+    console.table([
+      this.warrior2Sprite.currentframe,
+      this.warrior2Sprite.x,
+      this.warrior2Sprite.y]);
+
+        this.warrior2Sprite.currentframe++;
+
+  }
+  private warrior2AttackingSpritesDraw() {
+    /* Piirretään liikehdintä muuttujasta this.warrior1Sprite
+     */
+    this.c!.drawImage(this.bitmapCache2, this.warrior2Sprite.x, this.warrior2Sprite.y);
+
+  }
+
+  /* MAIN ANIMATE CALL */
+  public animateBattle(heroAttacking: boolean) {
+
+    this.renderCalled = true;
+    this.heroAttacking = heroAttacking;
+
+    /* Back to origin with timeout
+    */
+    setTimeout(() => {
+      this.renderCalled = false;
+      this.c!.fillStyle = 'black';
+      this.c!.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.c!.drawImage(this.backgroundImage!,0,0,this.canvas.width,this.canvas.height);
+      this.c!.drawImage(this.bitmapCache, 200, 220);
+      this.c!.drawImage(this.bitmapCache2, 700, 60);
+      this.warrior1Sprite = {
+        img: null,
+        x: 200,
+        y: 220,
+        width: 250,
+        height: 250,
+        currentframe: 0,
+        totalframes: 0,
+      };
+
+      this.warrior2Sprite = {
+        img: null,
+        x: 700,
+        y: 60,
+        width: 150,
+        height: 150,
+        currentframe: 0,
+        totalframes: 0,
+      };
+    }, 3000);
+
+    this.render();
+
+  }
+
+  public animateAttackWarrior1() {
+
+    this.animateBattle(true);
+  }
+
+  public animateAttackWarrior2() {
+
+    this.animateBattle(false);
+
+  }
+
 }
