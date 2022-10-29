@@ -43,6 +43,19 @@ public class StatProcessor
             }
         }
     }
+   
+    public async Task<string> LoadInspiration () {
+        string url = "https://api.kanye.rest/text";
+        using (HttpResponseMessage response = await ApiClientHelper.ApiClient.GetAsync (url)) {
+            if (response.IsSuccessStatusCode) {
+                string quote = await response.Content.ReadFromJsonAsync<string> ();
+                return (quote is not null ? quote : "no luck today");
+            } else {
+                throw new Exception (response.ReasonPhrase);
+            }
+        }
+    }
+    
     public async Task<StatModel> LoadStatsById (int id, bool offline = false) {
         string url = $"https://fineli.fi/fineli/api/v1/foods/{id}";
 

@@ -27,6 +27,14 @@ public class VeggieStatsController : ControllerBase {
         return stats;
     }
 
+    [HttpGet ("getInspiration")]
+    public async Task<string> GetInspiration () // <StatModel>
+    {
+        ApiClientHelper.InitializeClient ();
+        var inspiration = await Stat.LoadInspiration ();
+        return inspiration;
+    }
+
     [HttpGet ("{veggieId}")]
     public async Task<WarriorStatModel> GetStatsById (int veggieId, [FromQuery]bool offline) // <StatModel>
     {

@@ -3,13 +3,14 @@ import { Component, Input, OnInit } from '@angular/core';
 @Component({
   selector: 'app-video-player',
   templateUrl: './video-player.component.html',
-  styleUrls: ['./video-player.component.css']
+  styleUrls: ['./video-player.component.scss']
 })
 export class VideoPlayerComponent implements OnInit {
   @Input() gameOver: boolean = false;
   @Input() gameOverText: string = '';
 
   public static videoShow: boolean = false;
+  public kanyeOn: boolean = false;
 
   constructor() { }
 

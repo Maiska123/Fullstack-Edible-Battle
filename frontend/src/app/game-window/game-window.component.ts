@@ -598,7 +598,8 @@ export class GameWindowComponent implements OnInit {
         false
       );
 
-      if (this.attackQueue.at(-1)?.state == AttackTurn.warrior1Attacked && !this.warrior1Won){
+      if (this.attackQueue.at(-1)?.state == AttackTurn.warrior1Attacked
+      && !this.warrior1Won){
         this.animateAttackWarrior1();
       } else {
         this.animateAttackWarrior2();
@@ -614,7 +615,7 @@ export class GameWindowComponent implements OnInit {
               : 'You did beat that ugly veggie to the ground, GONGRATULATIONS!',
         });
 
-        this.animatePlayerFall(false);
+        if ( !this.autoClicked ) this.animatePlayerFall(false);
 
         this.battleQueue.push({
           state: BattleState.nextOpponentIncoming,
@@ -628,7 +629,7 @@ export class GameWindowComponent implements OnInit {
 
       if ((this.warrior1Stats.hp < 0 )) {
 
-        this.animatePlayerFall(true);
+        if ( !this.autoClicked ) this.animatePlayerFall(true);
 
       }
     }
@@ -706,11 +707,6 @@ export class GameWindowComponent implements OnInit {
       this.warrior1Stats.hp = this.heroMaxHp;
     }
 
-    this.heroHpAmount = this.warrior1Stats.hp;
-    this.enemyHpAmount = this.warrior2Stats.hp;
-
-    this.warrior1Won = false;
-
     if (this.warrior1Stats.attack == 0) this.warrior1Stats.attack = 1;
     if (this.warrior2Stats.attack == 0) this.warrior2Stats.attack = 1;
 
@@ -725,6 +721,13 @@ export class GameWindowComponent implements OnInit {
 
     if (this.warrior1Stats.speed == 0) this.warrior1Stats.speed = 1;
     if (this.warrior2Stats.speed == 0) this.warrior2Stats.speed = 1;
+
+
+    this.heroHpAmount = this.warrior1Stats.hp;
+    this.enemyHpAmount = this.warrior2Stats.hp;
+
+    this.warrior1Won = false;
+
 
     console.log('this.enemyHpAmount');
     console.log(this.enemyHpAmount);
@@ -786,6 +789,7 @@ export class GameWindowComponent implements OnInit {
           } else {
             this.calculateAndAdvanceBattle();
             let word = `Game has ended. You ${this.warrior1Stats.hp < this.warrior2Stats.hp ? 'lost' : 'won'}.`
+            this.textCurrentlyRolling = false;
             setTimeout(() => {
               this.dialogTextInput(word, false);
               this.haveSeenEnd = true;
@@ -1313,11 +1317,11 @@ export class GameWindowComponent implements OnInit {
         if (this.heroAttacking){
           this.warrior1AttackingSpritesUpdate();
           this.warrior1AttackingSpritesDraw();
-          this.c!.drawImage(this.bitmapCache2, 700, 60, this.warrior2Sprite.width, this.warrior2Sprite.height);
+          if (this.warrior2Stats.hp > 0) this.c!.drawImage(this.bitmapCache2, 700, 60, this.warrior2Sprite.width, this.warrior2Sprite.height);
         } else {
           this.warrior2AttackingSpritesUpdate();
           this.warrior2AttackingSpritesDraw();
-          this.c!.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
+          if (this.warrior1Stats.hp > 0) this.c!.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
         }
         this.animationTimer = 0;
       } else {
@@ -1367,13 +1371,21 @@ export class GameWindowComponent implements OnInit {
         height: 150,
      */
         if (this.warrior2Sprite.currentframe < 25){
+          /* lean back */
+
           if (this.warrior2Sprite.x < 730) this.warrior2Sprite.x++;
+
+
         } else if (this.warrior2Sprite.currentframe >= 25 &&
                     this.warrior2Sprite.currentframe < 100 ) {
+          /* push forward */
+
           if (this.warrior2Sprite.x > 600) this.warrior2Sprite.x -= 3;
           if (this.warrior2Sprite.y < 150) this.warrior2Sprite.y += 3;
         } else if (this.warrior2Sprite.currentframe >= 100 &&
                     this.warrior2Sprite.currentframe < 350 ) {
+          /* come back to original */
+
           if (this.warrior2Sprite.x < 700) this.warrior2Sprite.x += 3;
           if (this.warrior2Sprite.y > 60) this.warrior2Sprite.y -= 3;
           }
@@ -1432,12 +1444,12 @@ export class GameWindowComponent implements OnInit {
 
   public animateAttackWarrior1() {
 
-    this.animateBattle(true);
+    if ( !this.autoClicked ) this.animateBattle(true);
   }
 
   public animateAttackWarrior2() {
 
-    this.animateBattle(false);
+    if ( !this.autoClicked ) this.animateBattle(false);
 
   }
 

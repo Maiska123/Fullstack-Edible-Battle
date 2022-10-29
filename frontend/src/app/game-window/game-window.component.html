@@ -28,7 +28,7 @@
     class="video-player"
   ></app-video-player>
 
-<div *ngIf="(foesFallen > 0 && !gameOver) || (!algorythmsMan && gameOver && foesFallen > 0)"
+<div class="non-draggable" *ngIf="(foesFallen > 0 && !gameOver) || (!algorythmsMan && gameOver && foesFallen > 0) || (!algorythmsMan &&  foesFallen > 0)"
   style="position: absolute;
   top: -9px;
   left: 125px;">
@@ -43,7 +43,7 @@
 
 
 <!-- LOADING BAR -->
-  <div *ngIf="(!warrior1Ready && clicked && !algorythmsMan) || (!warrior2Ready && warrior2Called && warrior1Ready && !algorythmsMan)" id="parent">
+  <div class="non-draggable" *ngIf="(!warrior1Ready && clicked && !algorythmsMan) || (!warrior2Ready && warrior2Called && warrior1Ready && !algorythmsMan)" id="parent">
     <div id="child" class="abc non-draggable">Loading Fierce Veggies...</div>
   </div>
 </div>
@@ -58,6 +58,7 @@
     (click)="pushedButton('red')"
   >
   <p *ngIf="autoClicked"
+  class="non-draggable"
   style="font-stretch: extra-condensed;
         display: block;
         top: -14px;
@@ -74,7 +75,7 @@
       </div>
     </div>
 <!-- loading circle -->
-    <div *ngIf="autoClickerLoads && !autoClicked" id="circle3">
+    <div *ngIf="autoClickerLoads" id="circle3" [ngStyle]="{'background-color': autoClicked ? 'red' : '' }">
     </div>
 
   </div>
