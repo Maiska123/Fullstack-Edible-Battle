@@ -2,8 +2,8 @@ import { IContestantStats, GameContestantsService } from './../services/game-con
 import { GameImageService, IWaitingCounter } from './../services/game-image.service';
 import { AudioService } from './../services/audio.service';
 import { GameStatsService, IDebugStat } from './../services/game-stats.service';
-import { Component, OnInit } from '@angular/core';
-import { switchMap, Subject, BehaviorSubject } from 'rxjs';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { switchMap, Subject, BehaviorSubject, Observable, delay, takeUntil, fromEvent, tap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { VideoPlayerComponent } from '../video-player/video-player.component';
 import { Router, TitleStrategy } from '@angular/router';
@@ -57,7 +57,8 @@ export enum BattleState{
   warrior2Attacking,
   dialogTextInput,
   waitingForUser,
-  nextOpponentIncoming
+  nextOpponentIncoming,
+  animation
 }
 
 export interface BattleStatWithDescription{
@@ -90,6 +91,10 @@ export class GameWindowComponent implements OnInit {
   lastFetchedCounter: Date = new Date();
   accumulator: number = 1;
   private adjectivesToStart: string[] = ["angry","bold","brutal","cutthroat","dangerous","ferocious","fiery","furious","intense","murderous","passionate","powerful","raging","relentless","savage","stormy","strong","terrible","vehement","vicious","animal","ape","awful","barbarous","bloodthirsty","blustery","boisterous","brutish","cruel","enraged","fell","feral","flipped","frightening","horrible","howling","impetuous","infuriated","malevolent","malign","primitive","raving","tempestuous","threatening","tigerish","truculent","tumultous/tumultuous","uncontrollable","untamed","venomous","wild"];
+
+  @ViewChild('red', { static: false }) red: ElementRef | undefined ;
+  mouseDown$: Observable<any> = new Observable<any>();
+  mouseUp$: Observable<any> = new Observable<any>();
 
   counterData1!: IWaitingCounter;
 
@@ -165,6 +170,7 @@ export class GameWindowComponent implements OnInit {
   private lastRemaining1: number = 0;
   private lastRemaining2: number = 0;
   public gameOver: boolean = false;
+  public gameOverText: string = 'Your veggie sucked';
   private hpLoss: number = 0;
   public haveSeenEnd: any;
   public warrior1haswon: boolean = false;
@@ -174,8 +180,20 @@ export class GameWindowComponent implements OnInit {
   public lastRender: number = Date.now();
   public renderCalled: boolean = false;
   public animationInterval: NodeJS.Timer | undefined;
+  public interval: number = 1000/60;
+  public animationTimer: number = 0;
+
+  public timestamp: number = 0;
+
   public backgroundImage: HTMLImageElement | undefined;
   public heroAttacking: boolean = true;
+  public survivalMode: boolean = false;
+  public heroFallen: boolean = false;
+  public foesFallen: number = 0;
+  public autoClicker!: NodeJS.Timer;
+  public autoClicked: boolean = false;
+  public autoClickerLoads: boolean = false;
+  public mouseIsDown: boolean = false;
 
   constructor(
     private gameStatsService: GameStatsService,
@@ -189,6 +207,7 @@ export class GameWindowComponent implements OnInit {
       this.route = location.path();
 
       if (this.route.includes('twitch')) this.twitchMode = true;
+      if (this.route.includes('survival')) this.survivalMode = true;
     });
 
     this.dialogSubject.subscribe((text) => {
@@ -233,6 +252,21 @@ export class GameWindowComponent implements OnInit {
           this.audioService.playButtonSound(false);
         });
     }
+    this.mouseDown$ = fromEvent(this.red!.nativeElement, 'mousedown')/*.pipe(tap(console.log))*/;
+    this.mouseDown$.subscribe(() => {
+      this.mouseIsDown = true;
+      setTimeout(() => {
+        if (this.mouseIsDown && this.warrior1Ready && this.warrior2Ready)
+        this.autoClickerLoads = true;
+      }, 200);
+    })
+    this.mouseUp$ = fromEvent(this.red!.nativeElement, 'mouseup')/*.pipe(tap(console.log))*/;
+    this.mouseUp$.subscribe(() => {
+      this.mouseIsDown = false;
+      this.autoClicked = false;
+      this.autoClickerLoads = false;
+      clearInterval(this.autoClicker)
+    })
   }
 
   private dialogTextInputEffect(
@@ -351,25 +385,26 @@ export class GameWindowComponent implements OnInit {
             this.warrior1Ready = true;
             console.log('Drawing Image');
             if (this.c) {
-              this.c.drawImage(this.bitmapCache, 200, 220);
+              this.c.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
             }
           });
         if (this.c) {
-          this.c.drawImage(this.bitmapCache, 200, 220);
+          this.c.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
         }
+        this.disableEvolve();
       }
     }
   }
 
   private warrior1Hits(amount: number) {
-    this.battleQueue.push({state: BattleState.warrior1Attacking,message: amount.toFixed(0)});
-    this.battleQueue.push({state: BattleState.waitingForUser,message: `${this.warrior2Name} says: Ouch!`});
+    if (this.warrior1Stats.hp > 0) this.battleQueue.push({state: BattleState.warrior1Attacking,message: amount.toFixed(0)});
+    // this.battleQueue.push({state: BattleState.animation,message: `${this.warrior2Name} says: Ouch!`});
     this.attackQueue.push({state: AttackTurn.warrior1Attacked });
   }
 
   private warrior2Hits(amount: number) {
-    this.battleQueue.push({state: BattleState.warrior2Attacking,message: amount.toFixed(0),});
-    this.battleQueue.push({state: BattleState.waitingForUser,message: `${this.warrior1Name} says: Ouwie!`});
+    if (this.warrior2Stats.hp > 0) this.battleQueue.push({state: BattleState.warrior2Attacking,message: amount.toFixed(0),});
+    // this.battleQueue.push({state: BattleState.animation,message: `${this.warrior1Name} says: Ouwie!`});
     this.attackQueue.push({state: AttackTurn.warrior2Attacked });
 
   }
@@ -435,7 +470,7 @@ export class GameWindowComponent implements OnInit {
             (Math.ceil(this.warrior1Stats.luck)) -
           ((this.warrior2Stats.defence/10) * (Math.ceil(this.warrior2Stats.luck))) /
             this.warrior2Stats.hp;
-        this.warrior1Hits(damage < 1 ? 1 : (Math.ceil(damage)*10));
+        this.warrior1Hits(damage < 1 ? 1 : (Math.ceil(damage) /*added  low-healt luck factor*/ * ((this.warrior1Stats.luck > 10 && this.warrior1Stats.hp < 25) ? (this.warrior1Stats.luck % 9) : 1) ));
       } else {
         // warrior 2 deals damage
         let damage =
@@ -444,13 +479,10 @@ export class GameWindowComponent implements OnInit {
             (Math.ceil(this.warrior2Stats.luck)) -
           ((this.warrior1Stats.defence/10) * (Math.ceil(this.warrior1Stats.luck))) /
             this.warrior1Stats.hp;
-        this.warrior2Hits(damage < 1 ? 1 : (Math.ceil(damage)*10));
+        this.warrior2Hits(damage < 1 ? 1 : (Math.ceil(damage) /*added  low-healt luck factor*/ * ((this.warrior2Stats.luck > 10 && this.warrior2Stats.hp < 25) ? (this.warrior2Stats.luck % 9) : 1) ));
       }
       // }
     }
-
-    this.heroHpAmount = this.warrior1Stats.hp;
-    this.enemyHpAmount = this.warrior2Stats.hp;
 
   }
 
@@ -460,6 +492,8 @@ export class GameWindowComponent implements OnInit {
    *
    */
   public calculateAndAdvanceBattle() {
+    console.log(this.battleQueue);
+    if (this.foesFallen > 0) this.gameOverText = `You did beat ${this.foesFallen} foes`;
     // PÄÄTILANESITTÄJÄ
     // this.battleQueueStatus = QueueStatus.waitingForUser
 
@@ -502,8 +536,9 @@ export class GameWindowComponent implements OnInit {
     if (
       gameState?.state != BattleState.warrior1Attacking &&
       gameState?.state != BattleState.warrior2Attacking &&
-      gameState?.state != BattleState.nextOpponentIncoming
-
+      gameState?.state != BattleState.nextOpponentIncoming &&
+      gameState?.state != BattleState.animation &&
+      !this.warrior1Won
     ) {
       this.battleCalculations();
     }
@@ -552,50 +587,82 @@ export class GameWindowComponent implements OnInit {
     if (gameState?.state == BattleState.warrior1Attacking) {
       // BATTLE ANIMATION!
       this.hpLoss = Number(gameState?.message);
+      this.warrior2Stats.hp -= this.hpLoss;
 
       setTimeout(() => {
-        this.warrior2Stats.hp -= this.hpLoss;
+        this.enemyHpAmount = this.warrior2Stats.hp;
       }, 1100);
 
       this.dialogTextInput(
         `Our hero did ${gameState.message} damage to opponent!`,
         false
       );
+
+      if (this.attackQueue.at(-1)?.state == AttackTurn.warrior1Attacked && !this.warrior1Won){
+        this.animateAttackWarrior1();
+      } else {
+        this.animateAttackWarrior2();
+      }
+
       if ((this.warrior2Stats.hp < 0) && !this.warrior1Won) {
+        this.battleQueue = [];
+        this.battleQueue.push({
+          state: BattleState.dialogTextInput,
+          message:
+            this.warrior1Stats.hp < 0 && this.warrior2Stats.hp > 0
+              ? 'Hero has fallen. You Lose.'
+              : 'You did beat that ugly veggie to the ground, GONGRATULATIONS!',
+        });
+
+        this.animatePlayerFall(false);
+
         this.battleQueue.push({
           state: BattleState.nextOpponentIncoming,
           message: 'New Rival incoming!',
         });
+
         this.warrior1Won = true;
       }
+
       advance = true;
 
       if ((this.warrior1Stats.hp < 0 )) {
-        this.gameOver = true;
+
+        this.animatePlayerFall(true);
+
       }
     }
     if (gameState?.state == BattleState.warrior2Attacking) {
       // BATTLE ANIMATION!
 
       this.hpLoss = Number(gameState?.message);
+      this.warrior1Stats.hp -= this.hpLoss;
 
       setTimeout(() => {
-        this.warrior1Stats.hp -= this.hpLoss;
+        this.heroHpAmount = this.warrior1Stats.hp;
       }, 1100);
 
       this.dialogTextInput(
         `Opponent did ${gameState.message} damage to our hero!`,
         false
       );
+
+      if (this.attackQueue.at(-1)?.state == AttackTurn.warrior1Attacked && !this.warrior1Won){
+        this.animateAttackWarrior1();
+      } else {
+        this.animateAttackWarrior2();
+      }
+
       // this.battleQueue.push({ state: BattleState.dialogTextInput,message:`Opponent did ${gameState.message} damage to our hero!`});
       advance = true;
       if ((this.warrior1Stats.hp < 0 )) {
+        this.battleQueue = [];
         this.gameOver = true;
       }
     }
-    if (gameState?.state == BattleState.waitingForUser) {
+    if (gameState?.state == BattleState.animation) {
 
-      if (this.attackQueue.at(-1)?.state == AttackTurn.warrior1Attacked){
+      if (this.attackQueue.at(-1)?.state == AttackTurn.warrior1Attacked && !this.warrior1Won){
         this.animateAttackWarrior1();
       } else {
         this.animateAttackWarrior2();
@@ -615,9 +682,11 @@ export class GameWindowComponent implements OnInit {
         this.warrior2Stats.hp = 1;
         this.battleQueue = [];
         this.attackQueue = [];
+        if (this.warrior1EvolveStage < 3) this.enableEvolve();
         this.addAnotherContestant();
 
     }
+
 
     if (advance) this.currentGameState = this.battleQueue.shift();
 
@@ -633,6 +702,10 @@ export class GameWindowComponent implements OnInit {
     this.battleHasStarted = true;
     this.battleQueueStatus = QueueStatus.waitingForUser;
 
+    if (!this.survivalMode && this.warrior1Won) {
+      this.warrior1Stats.hp = this.heroMaxHp;
+    }
+
     this.heroHpAmount = this.warrior1Stats.hp;
     this.enemyHpAmount = this.warrior2Stats.hp;
 
@@ -640,6 +713,18 @@ export class GameWindowComponent implements OnInit {
 
     if (this.warrior1Stats.attack == 0) this.warrior1Stats.attack = 1;
     if (this.warrior2Stats.attack == 0) this.warrior2Stats.attack = 1;
+
+    if (this.warrior1Stats.hp == 0) this.warrior1Stats.hp = 1;
+    if (this.warrior2Stats.hp == 0) this.warrior2Stats.hp = 1;
+
+    if (this.warrior1Stats.defence == 0) this.warrior1Stats.defence = 1;
+    if (this.warrior2Stats.defence == 0) this.warrior2Stats.defence = 1;
+
+    if (this.warrior1Stats.luck == 0) this.warrior1Stats.luck = 1;
+    if (this.warrior2Stats.luck == 0) this.warrior2Stats.luck = 1;
+
+    if (this.warrior1Stats.speed == 0) this.warrior1Stats.speed = 1;
+    if (this.warrior2Stats.speed == 0) this.warrior2Stats.speed = 1;
 
     console.log('this.enemyHpAmount');
     console.log(this.enemyHpAmount);
@@ -695,18 +780,18 @@ export class GameWindowComponent implements OnInit {
 
         this.calculateAndAdvanceBattle();
       } else if (this.gameOver) {
-        if (!this.haveSeenEnd) {
+          if (this.haveSeenEnd) {
 
-          this.pushedButton('green');
-        } else {
-          this.calculateAndAdvanceBattle();
-          let word = `Game has ended. You ${this.warrior1Stats.hp < this.warrior2Stats.hp ? 'lost' : 'won'}.`
-          setTimeout(() => {
-            this.dialogTextInput(word, false);
-            this.haveSeenEnd = true;
-          }, 500);
+            this.pushedButton('green');
+          } else {
+            this.calculateAndAdvanceBattle();
+            let word = `Game has ended. You ${this.warrior1Stats.hp < this.warrior2Stats.hp ? 'lost' : 'won'}.`
+            setTimeout(() => {
+              this.dialogTextInput(word, false);
+              this.haveSeenEnd = true;
+            }, (this.renderCalled ? 2000 : 500));
+          }
         }
-      }
     }
   }
 
@@ -726,9 +811,26 @@ export class GameWindowComponent implements OnInit {
           // this.battleQueue.push({ state: BattleState.dialogTextInput, message: word });
           setTimeout(() => {
             this.dialogTextInput(word, false);
+            if (!this.warrior2Called) this.pushedButton('red');
           }, 2000);
         } else {
           // all the rest
+          this.mouseDown$.pipe(
+            delay(2000),
+            takeUntil(this.mouseUp$)
+          ).subscribe(res => {
+            // console.log('longpress----------------->')
+
+            if (this.warrior1Ready && this.warrior2Ready)
+            {
+              this.autoClicker = setInterval(()=>{
+                // console.log('autoclick')
+                this.autoClicked = true;
+                this.pushedButton('red')
+                if (!this.warrior1Ready || !this.warrior2Ready) clearInterval(this.autoClicker)
+              },150);
+            }
+          });
           if (!this.warrior2Ready && !this.warrior2Called && !this.warrior1Won) {
             this.audioService.playOkSound();
             this.addAnotherContestant();
@@ -761,7 +863,13 @@ export class GameWindowComponent implements OnInit {
 
   public disableEvolve() {
     document.getElementById('disabled-button2')?.setAttribute('disabled', '');
+
   }
+
+  public enableEvolve() {
+    document.getElementById('disabled-button2')?.removeAttribute('disabled');
+  }
+
 
   public wannaBeAlgoExpert() {
 
@@ -1015,7 +1123,7 @@ export class GameWindowComponent implements OnInit {
                     console.log('Drawing Image');
                     if (this.c) {
                       this.warrior2Called = false;
-                      this.c.drawImage(this.bitmapCache2, 700, 60);
+                      this.c.drawImage(this.bitmapCache2, 700, 60, this.warrior2Sprite.width, this.warrior2Sprite.height);
                       if (this.warrior1Ready)
                         this.battleQueueStatus = QueueStatus.started;
                       let message = `Enemy Contestant enters the battlefield... Say hello to ${this.warrior2Name}!`;
@@ -1041,7 +1149,7 @@ export class GameWindowComponent implements OnInit {
               console.log('Drawing Image');
               if (this.c) {
                 this.warrior2Called = false;
-                this.c.drawImage(placeholderImage, 700, 60);
+                this.c.drawImage(placeholderImage, 700, 60, this.warrior2Sprite.width, this.warrior2Sprite.height);
                 if (this.warrior1Ready)
                   this.battleQueueStatus = QueueStatus.started;
                 let message = `Enemy Contestant enters the battlefield... Say hello to ${this.warrior2Name}!`;
@@ -1118,7 +1226,7 @@ export class GameWindowComponent implements OnInit {
                           this.warrior1Ready = true;
                           console.log('Drawing Image');
                           if (this.c) {
-                            this.c.drawImage(this.bitmapCache, 200, 220);
+                            this.c.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
                             this.battleQueueStatus = QueueStatus.calculating;
                             if (this.warrior2Ready)
                               this.battleQueueStatus = QueueStatus.started;
@@ -1149,7 +1257,7 @@ export class GameWindowComponent implements OnInit {
                         this.warrior1Ready = true;
                         console.log('Drawing Image');
                         if (this.c) {
-                          this.c.drawImage(placeholderImage, 200, 220);
+                          this.c.drawImage(placeholderImage, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
                           this.battleQueueStatus = QueueStatus.calculating;
                           if (this.warrior2Ready)
                             this.battleQueueStatus = QueueStatus.started;
@@ -1179,7 +1287,7 @@ export class GameWindowComponent implements OnInit {
           image.onload = () => {
             this.backgroundImage = image;
             setTimeout(() => {
-              if (this.c) this.c.drawImage(image, 0, 0);
+              if (this.c) this.c.drawImage(image, 0, 0, this.canvas.width, this.canvas.height);
             }, 1000);
             setTimeout(() => {
               this.flickerOn = false;
@@ -1191,26 +1299,32 @@ export class GameWindowComponent implements OnInit {
   }
 
   public render() {
-
-      let delta = Date.now() - this.lastRender;
+      let delta = (this.timestamp ? this.timestamp : Date.now()) - this.lastRender;
+      this.lastRender = this.timestamp!;
       this.x += delta;
       this.y += delta;
-      this.c!.fillStyle = 'black';
-      this.c!.fillRect(0, 0, this.canvas.width, this.canvas.height);
-      this.c!.drawImage(this.backgroundImage!,0,0,this.canvas.width,this.canvas.height);
-      /* Animations
-       */
-      if (this.heroAttacking){
-        this.warrior1AttackingSpritesUpdate();
-        this.warrior1AttackingSpritesDraw();
-        this.c!.drawImage(this.bitmapCache2, 700, 60);
+      if (this.animationTimer > this.interval) {
+
+        this.c!.fillStyle = 'rgba(255,255,255,0.0)';
+        this.c!.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.c!.drawImage(this.backgroundImage!,0,0,this.canvas.width,this.canvas.height);
+        /* Animations
+        */
+        if (this.heroAttacking){
+          this.warrior1AttackingSpritesUpdate();
+          this.warrior1AttackingSpritesDraw();
+          this.c!.drawImage(this.bitmapCache2, 700, 60, this.warrior2Sprite.width, this.warrior2Sprite.height);
+        } else {
+          this.warrior2AttackingSpritesUpdate();
+          this.warrior2AttackingSpritesDraw();
+          this.c!.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
+        }
+        this.animationTimer = 0;
       } else {
-        this.warrior2AttackingSpritesUpdate();
-        this.warrior2AttackingSpritesDraw();
-        this.c!.drawImage(this.bitmapCache, 200, 220);
+        this.animationTimer += delta;
       }
 
-      if (this.renderCalled) window.requestAnimationFrame(() => this.render());
+      if (this.renderCalled) window.requestAnimationFrame(this.render.bind(this));
   }
 
   private warrior1AttackingSpritesUpdate() {
@@ -1220,23 +1334,20 @@ export class GameWindowComponent implements OnInit {
         width: 250,
         height: 250,
      */
-    if (this.warrior1Sprite.currentframe < 50){
+    if (this.warrior1Sprite.currentframe < 25){
       if (this.warrior1Sprite.x > 150) this.warrior1Sprite.x--;
 
-    } else if (this.warrior1Sprite.currentframe >= 50 &&
-                this.warrior1Sprite.currentframe < 200 ) {
+    } else if (this.warrior1Sprite.currentframe >= 25 &&
+                this.warrior1Sprite.currentframe < 100 ) {
       if (this.warrior1Sprite.x < 190) this.warrior1Sprite.x += 3;
       if (this.warrior1Sprite.y < 200) this.warrior1Sprite.y += 3;
 
-    } else if (this.warrior1Sprite.currentframe >= 200 &&
+    } else if (this.warrior1Sprite.currentframe >= 100 &&
                 this.warrior1Sprite.currentframe < 350 ) {
       if (this.warrior1Sprite.x > 200) this.warrior1Sprite.x -= 3;
       if (this.warrior1Sprite.y < 220) this.warrior1Sprite.y += 3;
       }
-    console.table([
-      this.warrior1Sprite.currentframe,
-      this.warrior1Sprite.x,
-      this.warrior1Sprite.y]);
+
 
     this.warrior1Sprite.currentframe++;
 
@@ -1244,7 +1355,7 @@ export class GameWindowComponent implements OnInit {
   private warrior1AttackingSpritesDraw() {
     /* Piirretään liikehdintä muuttujasta this.warrior1Sprite
      */
-    this.c!.drawImage(this.bitmapCache, this.warrior1Sprite.x, this.warrior1Sprite.y);
+    this.c!.drawImage(this.bitmapCache, this.warrior1Sprite.x, this.warrior1Sprite.y, this.warrior1Sprite.width, this.warrior1Sprite.height);
 
   }
 
@@ -1258,18 +1369,15 @@ export class GameWindowComponent implements OnInit {
         if (this.warrior2Sprite.currentframe < 25){
           if (this.warrior2Sprite.x < 730) this.warrior2Sprite.x++;
         } else if (this.warrior2Sprite.currentframe >= 25 &&
-                    this.warrior2Sprite.currentframe < 200 ) {
+                    this.warrior2Sprite.currentframe < 100 ) {
           if (this.warrior2Sprite.x > 600) this.warrior2Sprite.x -= 3;
           if (this.warrior2Sprite.y < 150) this.warrior2Sprite.y += 3;
-        } else if (this.warrior2Sprite.currentframe >= 200 &&
+        } else if (this.warrior2Sprite.currentframe >= 100 &&
                     this.warrior2Sprite.currentframe < 350 ) {
           if (this.warrior2Sprite.x < 700) this.warrior2Sprite.x += 3;
           if (this.warrior2Sprite.y > 60) this.warrior2Sprite.y -= 3;
           }
-    console.table([
-      this.warrior2Sprite.currentframe,
-      this.warrior2Sprite.x,
-      this.warrior2Sprite.y]);
+
 
         this.warrior2Sprite.currentframe++;
 
@@ -1277,12 +1385,13 @@ export class GameWindowComponent implements OnInit {
   private warrior2AttackingSpritesDraw() {
     /* Piirretään liikehdintä muuttujasta this.warrior1Sprite
      */
-    this.c!.drawImage(this.bitmapCache2, this.warrior2Sprite.x, this.warrior2Sprite.y);
+    this.c!.drawImage(this.bitmapCache2, this.warrior2Sprite.x, this.warrior2Sprite.y, this.warrior2Sprite.width, this.warrior2Sprite.height);
 
   }
 
   /* MAIN ANIMATE CALL */
   public animateBattle(heroAttacking: boolean) {
+    console.log('ANIMATEBATTLE');
 
     this.renderCalled = true;
     this.heroAttacking = heroAttacking;
@@ -1291,11 +1400,11 @@ export class GameWindowComponent implements OnInit {
     */
     setTimeout(() => {
       this.renderCalled = false;
-      this.c!.fillStyle = 'black';
+      this.c!.fillStyle = 'rgba(255,255,255,0.0)';
       this.c!.fillRect(0, 0, this.canvas.width, this.canvas.height);
       this.c!.drawImage(this.backgroundImage!,0,0,this.canvas.width,this.canvas.height);
-      this.c!.drawImage(this.bitmapCache, 200, 220);
-      this.c!.drawImage(this.bitmapCache2, 700, 60);
+      if (this.warrior1Stats.hp > 0) this.c!.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
+      if (this.warrior2Stats.hp > 0) this.c!.drawImage(this.bitmapCache2, 700, 60, this.warrior2Sprite.width, this.warrior2Sprite.height);
       this.warrior1Sprite = {
         img: null,
         x: 200,
@@ -1329,6 +1438,83 @@ export class GameWindowComponent implements OnInit {
   public animateAttackWarrior2() {
 
     this.animateBattle(false);
+
+  }
+
+  public animatePlayerFall(isHero: boolean){
+
+    this.renderCalled = true;
+    this.heroFallen = isHero;
+    /* Back to origin with timeout
+    */
+    setTimeout(() => {
+      this.renderCalled = false;
+      this.c!.fillStyle = 'rgba(255,255,255,0.0)';
+      this.c!.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.c!.drawImage(this.backgroundImage!,0,0,this.canvas.width,this.canvas.height);
+      if (this.warrior1Stats.hp > 0) this.c!.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
+      if (this.warrior2Stats.hp > 0) this.c!.drawImage(this.bitmapCache2, 700, 60, this.warrior2Sprite.width, this.warrior2Sprite.height);
+
+      this.warrior1Sprite = {
+        img: null,
+        x: 200,
+        y: 220,
+        width: 250,
+        height: 250,
+        currentframe: 0,
+        totalframes: 0,
+      };
+
+      if (this.heroFallen) this.gameOver = true;
+      else this.foesFallen++;
+
+    }, 3000);
+
+    this.renderFall();
+  }
+
+  public renderFall() {
+
+    let delta = (this.timestamp ? this.timestamp : Date.now()) - this.lastRender;
+    this.lastRender = this.timestamp!;
+    this.x += delta;
+    this.y += delta;
+    if (this.animationTimer > this.interval) {
+
+      this.c!.fillStyle = 'rgba(255,255,255,0.0)';
+      this.c!.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.c!.drawImage(this.backgroundImage!,0,0,this.canvas.width,this.canvas.height);
+      /* Animations
+      */
+      if (this.heroFallen){
+        this.warrior1FallSpritesUpdate();
+        this.warrior1FallSpritesDraw();
+        this.c!.drawImage(this.bitmapCache2, 700, 60, this.warrior2Sprite.width, this.warrior2Sprite.height);
+      } else {
+        this.warrior2FallSpritesUpdate();
+        this.warrior2FallSpritesDraw();
+        this.c!.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
+      }
+
+      this.animationTimer = 0;
+    } else {
+      this.animationTimer += delta;
+    }
+
+    if (this.renderCalled) window.requestAnimationFrame(this.renderFall.bind(this));
+}
+  warrior1FallSpritesUpdate() {
+    if (this.warrior1Sprite.height > 0) this.warrior1Sprite.height--;
+  }
+  warrior1FallSpritesDraw() {
+    this.c!.drawImage(this.bitmapCache, this.warrior1Sprite.x, this.warrior1Sprite.y, this.warrior1Sprite.width, this.warrior1Sprite.height);
+
+  }
+  warrior2FallSpritesUpdate() {
+    if (this.warrior2Sprite.height > 0) this.warrior2Sprite.height--;
+  }
+  warrior2FallSpritesDraw() {
+    this.c!.drawImage(this.bitmapCache2, this.warrior2Sprite.x, this.warrior2Sprite.y, this.warrior2Sprite.width, this.warrior2Sprite.height);
 
   }
 

@@ -23,11 +23,17 @@
     "
   ></div>
 
-  <app-video-player [gameOver]="gameOver"
+  <app-video-player [gameOver]="gameOver" [gameOverText]="gameOverText"
     *ngIf="algorythmsMan"
     class="video-player"
   ></app-video-player>
 
+<div *ngIf="(foesFallen > 0 && !gameOver) || (!algorythmsMan && gameOver && foesFallen > 0)"
+  style="position: absolute;
+  top: -9px;
+  left: 125px;">
+  <p>Foes Defeated: {{foesFallen}}</p>
+</div>
 <app-dialog-box  *ngIf="clicked" [inputData]="dialogText" [inputEnded]="textInputEnded"></app-dialog-box>
 
 <app-health-box *ngIf="warrior2Ready" [name]="enemyName" [amountIn]="enemyHpAmount" [maxAmount]="enemyMaxHp" [isEnemy]="enemyTrue"></app-health-box>
@@ -46,19 +52,37 @@
 <!-- BUTTONS -->
 <!--  -->
 <div class="button-box">
-  <div
+  <div #red
     class="button button-red"
     id="disabled-button1"
     (click)="pushedButton('red')"
   >
+  <p *ngIf="autoClicked"
+  style="font-stretch: extra-condensed;
+        display: block;
+        top: -14px;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        line-height: 0px;
+        left: 14px;"
+        >AUTOCLICKER ON</p>
+
     <div class="outer">
       <div class="height">
         <div class="inner"><span class="non-draggable">FIGHT</span></div>
       </div>
     </div>
+<!-- loading circle -->
+    <div *ngIf="autoClickerLoads && !autoClicked" id="circle3">
+    </div>
+
   </div>
 
-  <div class="button button-green" id="disabled-button3" (click)="pushedButton('green')">
+  <div
+    class="button button-green"
+    id="disabled-button3"
+    (click)="pushedButton('green')">
     <div class="outer">
       <div class="height">
         <div class="inner" style="line-height: 1em !important">
@@ -84,10 +108,11 @@
     class="button button-blue"
     id="disabled-button2"
     (click)="pushedButton('blue')"
+    disabled
   >
     <div class="outer">
       <div class="height">
-        <div class="inner"><span class="non-draggable">EVOLVE</span></div>
+        <div class="inner"><span class="non-draggable">EVOLVE</span><span *ngIf="warrior1EvolveStage == 3"><br><span>AT MAX</span></span></div>
       </div>
     </div>
   </div>

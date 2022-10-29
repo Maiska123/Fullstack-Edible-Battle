@@ -7,40 +7,33 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class VideoPlayerComponent implements OnInit {
   @Input() gameOver: boolean = false;
+  @Input() gameOverText: string = '';
 
   public static videoShow: boolean = false;
 
   constructor() { }
 
   ngOnInit() {
-    var video = document.getElementsByTagName('video')[0];
-
-    if (this.gameOver){
-      video.style.display ='none';
-      video.setAttribute('autoplay','false');
-      document.getElementById('text')!.innerHTML = 'Game Over';
-    } else {
-      video.setAttribute('autoplay','true');
-      video.onended = function(e) {
-        video.style.display ='none';
-      };
-    }
 
   }
 
   ngAfterViewInit(): void {
     var video = document.getElementsByTagName('video')[0];
 
-    if (this.gameOver){
-      video.style.display ='none';
-      video.setAttribute('autoplay','false');
-      document.getElementById('text')!.innerHTML = 'Game Over';
-    } else {
-      video.setAttribute('autoplay','true');
-      video.onended = function(e) {
+    if (video) {
+      if (this.gameOver){
         video.style.display ='none';
-      };
+        video.setAttribute('autoplay','false');
+      } else {
+        video.setAttribute('autoplay','true');
+        video.onended = function(e) {
+          video.style.display ='none';
+        };
+      }
     }
+    if (this.gameOver) document.getElementById('text')!.innerHTML =
+    '<span>Game Over</span><br><span>' + this.gameOverText + '</span>'
+    // 'Game Over' + this.gameOverText;
   }
 
 

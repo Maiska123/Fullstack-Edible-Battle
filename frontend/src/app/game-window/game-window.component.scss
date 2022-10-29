@@ -785,3 +785,45 @@ body {
   background: linear-gradient(top, #a11c1c 0%, #c32626 100%);
   /* W3C */
 }
+
+
+#circle3 {
+  display: block;
+  position: relative;
+  top: 0;
+  left: 40%;
+  height: 40px;
+  width: 40px;
+  border: 4px rgb(0 0 0 / 0%) solid;
+  border-top: 0px black solid;
+  border-right: 2px black solid;
+  border-bottom: 4px black solid;
+  border-radius: 50%;
+  -webkit-animation: spin3 2s linear forwards;
+          animation: spin3 2s linear forwards;
+}
+
+@-webkit-keyframes spin3 {
+  from {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg);
+  }
+}
+@keyframes spin3 {
+  from {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg);
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg);
+  }
+}
