@@ -1,0 +1,27 @@
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+WORKDIR /App
+ENV DOTNET_EnableDiagnostics=0
+ENV DOTNET_ENVIRONMENT=Development
+ENV USER_SECRETS_ID=27f82cdd-b6af-4a13-ba67-63615cc777fe
+COPY VeggieBattleBackend.csproj VeggieBattleBackend/
+# Restore as distinct layers
+RUN dotnet restore "VeggieBattleBackend/VeggieBattleBackend.csproj"
+
+# Copy everything
+COPY .  ./
+# Build and publish a release
+#RUN dotnet publish -c Release -o /out VeggieBattleBackend.csproj
+# ENTRYPOINT ["dotnet", "run", "--urls "http://0.0.0.0:5000;""]
+
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+RUN mkdir -p /App
+WORKDIR /App
+ENV DOTNET_ENVIRONMENT=Production
+ENV DOTNET_EnableDiagnostics=0
+COPY --from=build-env /App .
+EXPOSE 5000
+ENTRYPOINT ["dotnet", "run", "--urls "http://0.0.0.0:5000;""]
+
+# RUN  apt update &&  apt upgrade && apt install curl -y
+# ENTRYPOINT ["dotnet", "VeggieBattleBackend.dll"]

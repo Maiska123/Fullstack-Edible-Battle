@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  backend:
+    build:
+     context: "."
+     dockerfile: Dockerfile_dev
+     target: "build-env"   # We specify which stage of the dockerfile to use
+    command: sh -c "dotnet dev-certs https --trust && dotnet watch run --urls "http://0.0.0.0:5000;""
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - USER_SECRETS_ID=27f82cdd-b6af-4a13-ba67-63615cc777fe
+      - DEEPAI_APIKEY=<INSERT_API_KEY_HERE>
+    ports:
+      - 5000:5000
+      - 7220:7220
+    working_dir: /App
+    volumes:
+      - ./:/App
+      # Windows
+      - $APPDATA/Microsoft/UserSecrets/$USER_SECRETS_ID:/root/.microsoft/usersecrets/$USER_SECRETS_ID
+      # Linux
+      # - $HOME/.microsoft/usersecrets/$USER_SECRETS_ID:/root/.microsoft/usersecrets/$USER_SECRETS_ID
+    networks:
+      - veggienetwork
+
+networks:
+  veggienetwork:
+    name: veggienetwork

@@ -3,17 +3,22 @@ WORKDIR /App
 ENV DOTNET_EnableDiagnostics=0
 ENV DOTNET_ENVIRONMENT=Development
 ENV USER_SECRETS_ID=27f82cdd-b6af-4a13-ba67-63615cc777fe
-# Copy everything
-COPY . ./
+COPY backend/VeggieBattleBackend/VeggieBattleBackend.csproj backend/VeggieBattleBackend/
 # Restore as distinct layers
-RUN dotnet restore
+RUN dotnet restore "backend/VeggieBattleBackend/VeggieBattleBackend.csproj"
+
+# Copy everything
+COPY backend/VeggieBattleBackend ./
 # Build and publish a release
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -c Release -o out VeggieBattleBackend.csproj
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
+RUN mkdir -p /App
 WORKDIR /App
 ENV DOTNET_ENVIRONMENT=Production
-COPY --from=build-env /App/out .
 ENV DOTNET_EnableDiagnostics=0
-ENTRYPOINT ["dotnet", "DotNet.Docker.dll"]
+COPY --from=build-env /App/out .
+EXPOSE 5000
+RUN  apt update &&  apt upgrade && apt install curl -y
+ENTRYPOINT ["dotnet", "VeggieBattleBackend.dll"]

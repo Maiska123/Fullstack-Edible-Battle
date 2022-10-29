@@ -48,7 +48,7 @@ public class StatProcessor
         string url = "https://api.kanye.rest/text";
         using (HttpResponseMessage response = await ApiClientHelper.ApiClient.GetAsync (url)) {
             if (response.IsSuccessStatusCode) {
-                string quote = await response.Content.ReadFromJsonAsync<string> ();
+                string quote = await response.Content.ReadAsStringAsync();
                 return (quote is not null ? quote : "no luck today");
             } else {
                 throw new Exception (response.ReasonPhrase);

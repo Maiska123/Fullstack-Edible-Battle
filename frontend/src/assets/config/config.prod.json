@@ -1,4 +1,4 @@
 {
-  "apiUri": "https://localhost:5001",
-  "offline": true
+  "apiUri": "https://veggiebattle.miskahannunkivi.fi/api",
+  "offline": false
 }
