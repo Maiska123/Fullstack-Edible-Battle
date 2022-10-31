@@ -58,6 +58,12 @@ Tested in ![Google Chrome, hungry boi](https://img.shields.io/badge/Google_chrom
  - [ ] Fix development environment (did go crazy when opted for production containers)
  - [ ] Give credit where credit is due (many websites and friends and solidabis (the company i guess) who inspired me & yeezy ofc
  - [ ] Create shortcuts to survival and twitch modes from "main screen"
+ - [ ] That "main menu"
+ - [ ] Lvl system based on attack + hp (maybe defence)
+ - [ ] Mobile support
+ - [ ] SAVE/LOAD game states through staticFiles (backend dotnet-thing)
+ - [ ] Ingame Help (its so hard to push 1-button once or a little to activate autoclicker) BRUH
+
 
 ## Description
 
