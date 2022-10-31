@@ -63,7 +63,7 @@ Tested in ![Google Chrome, hungry boi](https://img.shields.io/badge/Google_chrom
  - [ ] Mobile support
  - [ ] SAVE/LOAD game states through staticFiles (backend dotnet-thing)
  - [ ] Ingame Help (its so hard to push 1-button once or a little to activate autoclicker) BRUH
-
+ - [ ] oh and last, better support for peasant/pleb browsers (other than chrome)
 
 ## Description
 
