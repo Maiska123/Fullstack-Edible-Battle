@@ -5,6 +5,7 @@
 ### QUICK NOTES
 * You can play this game at
   * https://veggiebattle.miskahannunkivi.fi/game
+  * no authentication implemented yet - working on it.
 * @Localhost
   * Docker
     * run "docker-compose-dev" -script at root (linux .sh or windows .bat)
