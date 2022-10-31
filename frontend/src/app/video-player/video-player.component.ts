@@ -8,9 +8,10 @@ import { Component, Input, OnInit } from '@angular/core';
 export class VideoPlayerComponent implements OnInit {
   @Input() gameOver: boolean = false;
   @Input() gameOverText: string = '';
+  @Input() inspirationalQuote: string = ''
 
   public static videoShow: boolean = false;
-  public kanyeOn: boolean = false;
+  @Input() kanyeWantsToSpeak: boolean = false;
 
   constructor() { }
 
@@ -21,15 +22,19 @@ export class VideoPlayerComponent implements OnInit {
   ngAfterViewInit(): void {
     var video = document.getElementsByTagName('video')[0];
 
-    if (video) {
-      if (this.gameOver){
-        video.style.display ='none';
-        video.setAttribute('autoplay','false');
-      } else {
-        video.setAttribute('autoplay','true');
-        video.onended = function(e) {
+    if (this.kanyeWantsToSpeak) {
+      console.log("Kanyes turn")
+    } else {
+      if (video) {
+        if (this.gameOver){
           video.style.display ='none';
-        };
+          video.setAttribute('autoplay','false');
+        } else {
+          video.setAttribute('autoplay','true');
+          video.onended = function(e) {
+            video.style.display ='none';
+          };
+        }
       }
     }
     if (this.gameOver) document.getElementById('text')!.innerHTML =
@@ -41,7 +46,7 @@ export class VideoPlayerComponent implements OnInit {
   public static powerSwitch() {
     let body = document.getElementById("wrapper");
     body!.className = (body!.className == "on") ? "off" : "on";
-    if (!this.videoShow) document.getElementsByTagName('video')[0].style.display = 'none';
+    if (!this.videoShow && document.getElementsByTagName('video')[0]) document.getElementsByTagName('video')[0].style.display = 'none';
 
   }
 }

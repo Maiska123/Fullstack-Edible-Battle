@@ -28,11 +28,11 @@ public class VeggieStatsController : ControllerBase {
     }
 
     [HttpGet ("getInspiration")]
-    public async Task<string> GetInspiration () // <StatModel>
+    public async Task<IActionResult> GetInspiration () // <StatModel>
     {
         ApiClientHelper.InitializeClient ();
         var inspiration = await Stat.LoadInspiration ();
-        return inspiration;
+        return Ok(inspiration);
     }
 
     [HttpGet ("{veggieId}")]

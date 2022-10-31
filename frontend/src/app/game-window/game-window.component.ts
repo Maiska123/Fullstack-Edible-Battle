@@ -85,8 +85,8 @@ export class GameWindowComponent implements OnInit {
   canvas!: HTMLCanvasElement;
   c!: CanvasRenderingContext2D | null;
   clicked: boolean = false;
-  public bitmapCache!: ImageBitmap;
-  public bitmapCache2!: ImageBitmap;
+  public bitmapCache!: ImageBitmap | HTMLImageElement;
+  public bitmapCache2!: ImageBitmap | HTMLImageElement;
   readonly failoverCounter: number = 3;
   lastFetchedCounter: Date = new Date();
   accumulator: number = 1;
@@ -194,6 +194,8 @@ export class GameWindowComponent implements OnInit {
   public autoClicked: boolean = false;
   public autoClickerLoads: boolean = false;
   public mouseIsDown: boolean = false;
+  public inspiration: string = 'no you.';
+  public kanyeWantsToSpeak: boolean = true;
 
   constructor(
     private gameStatsService: GameStatsService,
@@ -816,7 +818,7 @@ export class GameWindowComponent implements OnInit {
           setTimeout(() => {
             this.dialogTextInput(word, false);
             if (!this.warrior2Called) this.pushedButton('red');
-          }, 2000);
+          }, 500);
         } else {
           // all the rest
           this.mouseDown$.pipe(
@@ -878,6 +880,9 @@ export class GameWindowComponent implements OnInit {
   public wannaBeAlgoExpert() {
 
     if (!this.gameOver) {
+
+
+
       if (this.algorythmsMan) {
         VideoPlayerComponent.videoShow = false;
 
@@ -885,6 +890,7 @@ export class GameWindowComponent implements OnInit {
 
         setTimeout(() => {
           this.algorythmsMan = false;
+          this.kanyeWantsToSpeak = !this.kanyeWantsToSpeak;
           this.audioService.bringTheBeatBack();
 
           document
@@ -898,14 +904,23 @@ export class GameWindowComponent implements OnInit {
       }
     }
 
+    if (!this.gameOver) this.contestantService.getInspiration().subscribe((callfromabove) => {this.inspiration = callfromabove;})
+    else { this.inspiration = 'no you.' };
+      this.kanyeWantsToSpeak = !this.kanyeWantsToSpeak;
+
+      if (this.kanyeWantsToSpeak && !this.algorythmsMan)  this.audioService.playThatOneSound();
+
     this.algorythmsMan = true;
 
     if (this.gameOver) {
       this.audioService.bgMusicPlayer.stop() ;
     document.getElementById('disabled-button3')?.setAttribute('disabled', '');
 
-    } else this.audioService.dimBGMusic();
+    } else {
 
+      this.audioService.dimBGMusic();
+
+    }
     document.getElementById('disabled-button1')?.setAttribute('disabled', '');
     document.getElementById('disabled-button2')?.setAttribute('disabled', '');
 
@@ -927,7 +942,7 @@ export class GameWindowComponent implements OnInit {
     // element2!.dispatchEvent(event);
   }
 
-  public imageCounterClock(name: string, count: number): void {
+  public imageCounterClock(name: string, count: number): void { /* THIS IS BROKEN :( */
     if (this.c) {
       if (this.loadingbar) {
         if (Number(this.loadingbar.style.width) >= this.c.canvas.width)
@@ -1149,6 +1164,9 @@ export class GameWindowComponent implements OnInit {
             placeholderImage.src = 'assets/placeholder_vegetable.jpg';
 
             placeholderImage.onload = () => {
+
+              this.bitmapCache2 = placeholderImage;
+
               this.warrior2Ready = true;
               console.log('Drawing Image');
               if (this.c) {
@@ -1251,6 +1269,8 @@ export class GameWindowComponent implements OnInit {
                   placeholderImage.src = 'assets/placeholder_vegetable.jpg';
 
                   placeholderImage.onload = () => {
+                    this.bitmapCache = placeholderImage;
+
                     this.contestantService
                       .setContestantStatsById(
                         this.warrior1Stats.id,
@@ -1295,9 +1315,9 @@ export class GameWindowComponent implements OnInit {
             }, 1000);
             setTimeout(() => {
               this.flickerOn = false;
-            }, 2000);
+            }, 1500);
           };
-        }, 2000);
+        }, 1500);
       }
     }
   }

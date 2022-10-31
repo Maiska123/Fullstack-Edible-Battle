@@ -799,8 +799,57 @@ body {
   border-right: 2px black solid;
   border-bottom: 4px black solid;
   border-radius: 50%;
+
+}
+.not-spinning{
   -webkit-animation: spin3 1s ease infinite;
           animation: spin3 1s ease infinite;
+}
+.spinning{
+  -webkit-animation: spin3-clicked 0.5s linear infinite;
+  animation: spin3-clicked 0.5s linear infinite;
+}
+
+
+@-webkit-keyframes spin3-clicked {
+  0% {
+    background-color:rgba(255, 0, 0, 0.803);
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  50% {
+    background-color:rgba(255, 0, 0, 0.900);
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg);
+  }
+  100% {
+    background-color:rgba(255, 0, 0, 0.803);
+    -webkit-transform: rotate(720deg);
+            transform: rotate(720deg);
+  }
+}
+@keyframes spin3-clicked {
+  0% {
+    background-color:rgba(255, 0, 0, 0.803);
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  50% {
+    background-color:rgba(255, 0, 0, 0.900);
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg);
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg);
+  }
+  100% {
+    background-color:rgba(255, 0, 0, 0.800);
+    -webkit-transform: rotate(720deg);
+            transform: rotate(720deg);
+    -webkit-transform: rotate(720deg);
+            transform: rotate(720deg);
+  }
 }
 
 @-webkit-keyframes spin3 {

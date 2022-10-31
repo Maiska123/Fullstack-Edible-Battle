@@ -75,4 +75,10 @@ export class GameContestantsService {
     return this.http.post<any>(this.apiBaseUrl + this.serviceUrl + path, stats);
   }
 
+  public getInspiration(): Observable<string> {
+    const path = `/getInspiration`;
+
+    return this.http.get<string>(this.apiBaseUrl + this.serviceUrl + path);
+  }
+
 }

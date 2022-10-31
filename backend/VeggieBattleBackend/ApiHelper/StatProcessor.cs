@@ -49,7 +49,7 @@ public class StatProcessor
         using (HttpResponseMessage response = await ApiClientHelper.ApiClient.GetAsync (url)) {
             if (response.IsSuccessStatusCode) {
                 string quote = await response.Content.ReadAsStringAsync();
-                return (quote is not null ? quote : "no luck today");
+                return (quote is not null ? System.Text.Json.JsonSerializer.Serialize(quote) : System.Text.Json.JsonSerializer.Serialize("no luck today"));
             } else {
                 throw new Exception (response.ReasonPhrase);
             }

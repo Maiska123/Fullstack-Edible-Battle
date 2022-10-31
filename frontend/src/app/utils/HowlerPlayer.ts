@@ -39,13 +39,13 @@ export class HowlerPlayer {
   }
 
   dimMusic(){
-    let sound = this._sounds[this._index].howl;
-    sound.volume(0.4)
+    let sound = this._sounds[this._index]!.howl;
+    if (sound) sound.volume(0.3)
   }
 
   bringTheBeatBack() {
-    let sound = this._sounds[this._index].howl;
-    sound.volume(1)
+    let sound = this._sounds[this._index]!.howl;
+    if (sound) sound.volume(1)
     // sound.volume(1.5)
   }
 
@@ -123,6 +123,40 @@ export class HowlerPlayer {
       howl.play();
     }
     this.currentlyPlaying$.next(sound.sourceUrl.match('\/(?!audio\/)(([a-z]).*)\..*')![0].replace('/',''));
+  }
+
+  public playGodsPlan(index: number = 0, volDown?: boolean) {
+
+    let sound = this._sounds[index];
+
+    sound.howl = new Howl({
+      src: [sound.sourceUrl],
+      html5: true,
+      autoplay: false,
+      volume: 1,
+
+      onplay: () => {
+        requestAnimationFrame(this.seekStep); //  PROGRESS STEP CALL
+      },
+      onseek: () => {
+        // Start upating the progress of the track.
+        requestAnimationFrame(this.seekStep);
+      },
+      onend: () => {
+        // this.skip('next');
+      },
+    });
+
+    this.index = index;
+
+    if (sound.howl == null) {
+      this.skip();
+    } else {
+      let howl = sound.howl;
+      howl.fade(0, 1, 200);
+      howl.play();
+    }
+    // this.currentlyPlaying$.next(sound.sourceUrl.match('\/(?!audio\/)(([a-z]).*)\..*')![0].replace('/',''));
   }
 
   /** */

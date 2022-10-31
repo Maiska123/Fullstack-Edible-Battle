@@ -9,6 +9,7 @@ export class AudioService {
 
 bgMusicPlaying: boolean = false;
 bgMusicPlayer!: HowlerPlayer;
+inspirationPlayer!: HowlerPlayer;
 public currentlyPlaying$: BehaviorSubject<string> = new BehaviorSubject<string>('null');
 
 public viewDidLoad(twitchMode: boolean = false) {
@@ -39,6 +40,26 @@ public viewDidLoad(twitchMode: boolean = false) {
 
   })
 
+  this.inspirationPlayer =
+   new HowlerPlayer([
+    "assets/audio/inspiration1.mp3",
+    "assets/audio/inspiration2.mp3",
+    "assets/audio/inspiration3.mp3",
+    "assets/audio/inspiration4.mp3",
+    "assets/audio/inspiration5.mp3",
+    "assets/audio/inspiration6.mp3",
+    "assets/audio/inspiration7.mp3",
+    "assets/audio/inspiration8.mp3",
+    "assets/audio/inspiration9.mp3",
+    "assets/audio/inspiration10.mp3",
+    "assets/audio/inspiration11.mp3",
+    "assets/audio/inspiration12.mp3",
+    "assets/audio/inspiration13.mp3",
+    "assets/audio/inspiration14.mp3",
+    "assets/audio/inspiration15.mp3",
+    "assets/audio/inspiration16.mp3"
+  ]);
+
 }
 
 constructor() {
@@ -46,6 +67,9 @@ constructor() {
 
  }
 
+ playThatOneSound(){
+  this.inspirationPlayer.playGodsPlan(( Math.floor(Math.random() * (Math.ceil(16)) ) ));
+ }
 
 playTextSound(){
   this.bgMusicPlayer.playTextSound();
