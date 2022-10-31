@@ -3,6 +3,10 @@
  <hr>
 
 ### QUICK NOTES
+
+#### NOT A RELEASE OR READY FOR IT FOR A WHILE
+#### NO TESTS IMPLEMENTED FOR TIMELY REASONS (COULD'VE BUT GOT LIFE)
+
 * You can play this game at
   * https://veggiebattle.miskahannunkivi.fi/game
   * no authentication implemented yet - working on it.
