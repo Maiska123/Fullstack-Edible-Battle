@@ -9,6 +9,10 @@
 
 * You can play this game at
   * https://veggiebattle.miskahannunkivi.fi/game
+    * want even better experience?
+      * [twitch-mode](https://veggiebattle.miskahannunkivi.fi/game/twitch)
+      * [survival-mode](https://veggiebattle.miskahannunkivi.fi/game/survival)
+      * [twitch-survival-mode](https://veggiebattle.miskahannunkivi.fi/game/twitch/survival)
   * no authentication implemented yet - working on it.
   * no mobile support - its just plain ugly. Working on it.
 * @Localhost
@@ -47,10 +51,13 @@ Tested in ![Google Chrome, hungry boi](https://img.shields.io/badge/Google_chrom
 ###  TODO
 
  - [x] Game working with minimal logic in development mode
- - [ ] Game working in production mode
- - [ ] Containerized game to run with one-liner
- - [ ] Game to work in a loop so there can be enemy after enemy so "body count" can be incremented after winning a match
- - [ ] Offline mode fully supported (every 3rd party API call to be with offline fall logic)
+ - [x] Game working in production mode
+ - [x] Containerized game to run with one-liner
+ - [x] Game to work in a loop so there can be enemy after enemy so "body count" can be incremented after winning a match
+ - [-] Offline mode fully supported (every 3rd party API call to be with offline fall logic)
+ - [ ] Fix development environment (did go crazy when opted for production containers)
+ - [ ] Give credit where credit is due (many websites and friends and solidabis (the company i guess) who inspired me & yeezy ofc
+ - [ ] Create shortcuts to survival and twitch modes from "main screen"
 
 ## Description
 
