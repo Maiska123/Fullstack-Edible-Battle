@@ -1,6 +1,21 @@
 # Fullstack Edible Battle
  Game based on Solidabis challenge about foods battling against each other based on nutrition values
  <hr>
+
+### QUICK NOTES
+* You can play this game at
+  * https://veggiebattle.miskahannunkivi.fi/game
+* @Localhost
+  * Docker
+    * run "docker-compose-dev" -script at root (linux .sh or windows .bat)
+  * native ( ```node & dotnet```)
+    * cd frontend 
+      * npm run start-dev
+    * cd backend/VeggieBattleBackend
+      * dotnet run
+
+
+ <hr>
  
 | Frontend | Backend |
 |--|--|
