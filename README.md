@@ -13,7 +13,8 @@
       * npm run start-dev
     * cd backend/VeggieBattleBackend
       * dotnet run
-
+### Why tho
+ It was fun experiment because always wanted to create games but haven't had motivating oppoturnities for it.
 
  <hr>
  
