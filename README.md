@@ -23,6 +23,10 @@
       * npm run start-dev
     * cd backend/VeggieBattleBackend
       * dotnet run
+
+
+  #### Remember autoclicker to rescue :D (those 1 hp per attacks are cumbersome)
+   ![Autoclicker](docs/pics/autoclicker.jpg)
 ### Why tho
  It was fun experiment because always wanted to create games but haven't had motivating oppoturnities for it.
 
