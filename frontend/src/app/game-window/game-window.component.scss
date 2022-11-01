@@ -2,10 +2,121 @@
   z-index: 99999;
 }
 
-.canvas {
-  filter: opacity(0.7) blur(0.01px) brightness(0.9) contrast(1.2);
-  transform: scale(1.12) translate(-21px, -23px);
+
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+  .canvas {
+    max-width: 488px;
+    filter: opacity(0.7) blur(0.01px) brightness(0.9) contrast(1.2);
+    transform: scale(1.02) translate(-5px, 28px);
+  }
+
+  .button-box {
+    display: flex;
+    max-height: 177px;
+    position: relative;
+    width: 726px;
+    left: 50%;
+    top: 8vh;
+    transform: translate(-50%, -13vw) scale(0.7);
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    flex-direction: row-reverse;
+  }
+
+  .window-component{
+    transform: translate(117px, 7px);
+    margin-bottom: 34px;
+    display: inline-block;
+    background: repeating-linear-gradient(0, #fff, #fff 2px, transparent 4px);
+    box-shadow: -6px 14px 12px 4px rgb(255 255 255 / 97%);
+  }
+
 }
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 601px) and (max-width: 1150px) {
+  .canvas {
+    filter: opacity(0.7) blur(0.01px) brightness(0.9) contrast(1.2);
+    max-width: 94vw;
+    position: relative;
+    left: 50%;
+    transform: translate(-51%);
+  }
+
+  .button-box {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    transform: translate(-9px, -32px);
+    align-content: flex-start;
+    flex-direction: row;
+  }
+
+  .window-component{
+    margin-bottom: 13px;
+    display: inline-block;
+    position: relative;
+    padding: 39px 39px 17px 38px;
+    background: repeating-linear-gradient(0, #fff, #fff 2px, transparent 4px);
+    box-shadow: -6px 14px 12px 4px rgb(255 255 255 / 97%);
+  }
+
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 1150px) and (max-width: 1200px) {
+  .canvas {
+    filter: opacity(0.7) blur(0.01px) brightness(0.9) contrast(1.2);
+    transform: scale(1.12) translate(-21px, -23px);
+  }
+
+  .button-box {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    flex-direction: row;
+  }
+
+  .window-component{
+    margin-bottom: 13px;
+    display: inline-block;
+    position: relative;
+    padding: 39px 39px 17px 38px;
+    background: repeating-linear-gradient(0, #fff, #fff 2px, transparent 4px);
+    box-shadow: -6px 14px 12px 4px rgb(255 255 255 / 97%);
+  }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 1201px) {
+  .canvas {
+    filter: opacity(0.7) blur(0.01px) brightness(0.9) contrast(1.2);
+    transform: scale(1.12) translate(-21px, -23px);
+  }
+
+  .button-box {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    flex-direction: row;
+  }
+
+  .window-component{
+    margin-bottom: 13px;
+    display: inline-block;
+    position: relative;
+    padding: 39px 39px 17px 38px;
+    background: repeating-linear-gradient(0, #fff, #fff 2px, transparent 4px);
+    box-shadow: -6px 14px 12px 4px rgb(255 255 255 / 97%);
+  }
+
+}
+
 
 #child {
   width: 586px;
@@ -351,14 +462,6 @@
   /* Chrome10+,Safari5.1+ */
   background: linear-gradient(top, #545454 0%, #747474 100%);
   /* W3C */
-}
-
-.button-box {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-start;
-  align-content: flex-start;
-  flex-direction: row;
 }
 
 body {
