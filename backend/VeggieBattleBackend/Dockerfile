@@ -20,5 +20,4 @@ ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_EnableDiagnostics=0
 COPY --from=build-env /App/out .
 EXPOSE 5000
-RUN  apt update &&  apt upgrade && apt install curl -y
 ENTRYPOINT ["dotnet", "VeggieBattleBackend.dll"]
