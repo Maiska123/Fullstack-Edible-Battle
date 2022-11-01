@@ -56,7 +56,7 @@ export class GameStatsService {
 
   startSth(): void {
     if (!this._id) {
-      console.log('STARTED CLOCK');
+
 
       this._id = setInterval(() => {
         this.endDate = new Date();

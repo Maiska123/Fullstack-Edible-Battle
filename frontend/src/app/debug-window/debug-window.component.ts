@@ -55,11 +55,9 @@ export class DebugWindowComponent implements OnInit {
   }
 
   public initSubs(): void {
-    console.log('this.subscriptions')
     this.subscriptions.unsubscribe();
     this.subscriptions = new Subscription();
     this.handleSubscriptions();
-    console.log(this.subscriptions)
 
   }
   public something() {
@@ -75,7 +73,6 @@ export class DebugWindowComponent implements OnInit {
   }
 
   private handleSubscriptions(): void {
-    console.log('handleSubscriptions()');
     this.gameStatsService.observables$.forEach(BehaviousSubject => {
       let name: string;
       this.subscriptions.add(
@@ -83,9 +80,9 @@ export class DebugWindowComponent implements OnInit {
             switchMap(resp => {
                 name = resp.name
                 return resp.data
-            }),finalize(() => console.log(`${name} of BehaviousSubject.pipe() --> valmis`)))
+            }),finalize(() => {/* VOID */}))
           .subscribe(data => {
-            // console.log(data);
+            //
             let index = this.itemArray.findIndex(z => z.name == name);
             if (index > -1) this.itemArray[index].data = data
             else this.itemArray.push({name: name, data: data});

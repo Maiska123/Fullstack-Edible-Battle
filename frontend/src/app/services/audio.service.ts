@@ -18,6 +18,9 @@ public viewDidLoad(twitchMode: boolean = false) {
   twitchMode ? new HowlerPlayer([
     "assets/audio/crickets.mp3",
     "assets/audio/crickets.mp3",
+    "assets/audio/crickets.mp3",
+    "assets/audio/crickets.mp3",
+    "assets/audio/crickets.mp3",
   ])
   : new HowlerPlayer([
     "assets/audio/battleBG7.mp3",
@@ -68,7 +71,7 @@ constructor() {
  }
 
  playThatOneSound(){
-  this.inspirationPlayer.playGodsPlan(( Math.floor(Math.random() * (Math.ceil(16)) ) ));
+  this.inspirationPlayer.playGodsPlan(( Math.floor(Math.random() * (Math.ceil(15)) ) ));
  }
 
 playTextSound(){

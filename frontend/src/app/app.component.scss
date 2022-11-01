@@ -114,7 +114,7 @@
 @media only screen and (max-width: 1150px) {
   .marquee {
     pointer-events: none;
-    background-image: url(../assets/background_marquee.png);
+    // background-image: url(../assets/background_marquee.png);
     position: fixed;
     z-index: 9999999;
     top: -1%;

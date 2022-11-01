@@ -55,6 +55,7 @@ Tested in ![Google Chrome, hungry boi](https://img.shields.io/badge/Google_chrom
  - [x] Containerized game to run with one-liner
  - [x] Game to work in a loop so there can be enemy after enemy so "body count" can be incremented after winning a match
  - [ ] "*Partially done*" Offline mode fully supported (every 3rd party API call to be with offline fall logic)
+ - [ ] LOL those horrible animations to life :D
  - [ ] Fix development environment (did go crazy when opted for production containers)
  - [ ] Give credit where credit is due (many websites and friends and solidabis (the company i guess) who inspired me & yeezy ofc
  - [ ] Create shortcuts to survival and twitch modes from "main screen"

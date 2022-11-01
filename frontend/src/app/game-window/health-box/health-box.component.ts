@@ -66,9 +66,9 @@ export class HealthBoxComponent implements OnInit {
 
   public displayHp(currentHp: number){
     // if() {
-      console.log('currentHp');
-      console.log(currentHp);
-      console.log(this.amount);
+
+
+
 
       this.amount = currentHp;
       let calculatedAmount = this.amount > 0 ? ((this.amount / this.maxAmount) * 100) : 0;

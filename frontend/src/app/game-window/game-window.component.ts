@@ -234,8 +234,6 @@ export class GameWindowComponent implements OnInit {
 
     if (this.c) {
       this.drawLobbyImgToCanvas();
-
-      console.log(this.c);
     }
     this.audioService.viewDidLoad(this.twitchMode);
 
@@ -300,7 +298,7 @@ export class GameWindowComponent implements OnInit {
         50
       );
     } else if (textAt > text.length || this.lastMessageManuallyTriggered || !this.textCurrentlyRolling) {
-      // console.log('automatic textinput ended');
+      //
 
       this.dialogSubject.next(text);
 
@@ -385,7 +383,6 @@ export class GameWindowComponent implements OnInit {
           })
           .finally(() => {
             this.warrior1Ready = true;
-            console.log('Drawing Image');
             if (this.c) {
               this.c.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
             }
@@ -428,12 +425,6 @@ export class GameWindowComponent implements OnInit {
       this.warrior2Stats.speed *
         /*Luck Factor*/ ((Math.floor(Math.random() * (Math.ceil(this.warrior2Stats.luck))) + 1) /10) +
       ((this.lastRemaining2 - (Math.ceil(this.warrior2Stats.luck))) % 100);
-
-
-    console.log(['this.lastRemaining1',this.lastRemaining1]);
-    console.log(['this.lastRemaining2',this.lastRemaining2]);
-    console.log(['remaining1',remaining1]);
-    console.log(['remaining2',remaining2]);
 
     this.lastRemaining1 = (remaining1 % 100);
     this.lastRemaining2 = (remaining2 % 100);
@@ -494,7 +485,6 @@ export class GameWindowComponent implements OnInit {
    *
    */
   public calculateAndAdvanceBattle() {
-    console.log(this.battleQueue);
     if (this.foesFallen > 0) this.gameOverText = `You did beat ${this.foesFallen} foes`;
     // PÄÄTILANESITTÄJÄ
     // this.battleQueueStatus = QueueStatus.waitingForUser
@@ -545,10 +535,6 @@ export class GameWindowComponent implements OnInit {
       this.battleCalculations();
     }
 
-
-    console.table(gameState);
-    console.table(this.battleQueueStatus);
-
     let advance: boolean = false;
     // annetaan edistää jonoa vain kun asiat ovat sillä mallilla
 
@@ -568,7 +554,6 @@ export class GameWindowComponent implements OnInit {
     // 2. jos painetaan ennen viestin loppumista täytyy viesti tulostaa loppuun - turhaa, ei muuten lue viestiä
     // 3. jos painetaan kun viesti on loppu niin edistetään seuraavaan steppiin
 
-    console.log('-------- BATTLE STATE LOGIC ----------');
 
     if (gameState?.state == BattleState.dialogTextInput) {
       this.lastMessageManuallyTriggered = true;
@@ -730,12 +715,6 @@ export class GameWindowComponent implements OnInit {
 
     this.warrior1Won = false;
 
-
-    console.log('this.enemyHpAmount');
-    console.log(this.enemyHpAmount);
-    console.log('this.heroHpAmount');
-    console.log(this.heroHpAmount);
-
     this.advanceBattle();
   }
 
@@ -746,12 +725,6 @@ export class GameWindowComponent implements OnInit {
    * or waiting for user (user clicks button to advance)
    */
   public advanceBattle() {
-    console.log('this.battleQueue.length');
-    console.log(this.battleQueue.length);
-    console.log('this.warrior1Ready && this.warrior2Ready');
-    console.log(this.warrior1Ready && this.warrior2Ready);
-    console.log('this.battleQueueStatus');
-    console.log(this.battleQueueStatus);
 
     if (this.battleQueueStatus == QueueStatus.stopped) {
       let word =
@@ -773,7 +746,6 @@ export class GameWindowComponent implements OnInit {
         this.battleQueueStatus == QueueStatus.started
       ) {
         // battle begins
-        console.log('startBattle');
 
         this.startBattle();
       } else if (
@@ -781,7 +753,6 @@ export class GameWindowComponent implements OnInit {
         this.battleHasStarted && !this.gameOver
       ) {
         // in battle
-        console.log('in battle');
 
         this.calculateAndAdvanceBattle();
       } else if (this.gameOver) {
@@ -825,12 +796,12 @@ export class GameWindowComponent implements OnInit {
             delay(2000),
             takeUntil(this.mouseUp$)
           ).subscribe(res => {
-            // console.log('longpress----------------->')
+            //
 
             if (this.warrior1Ready && this.warrior2Ready)
             {
               this.autoClicker = setInterval(()=>{
-                // console.log('autoclick')
+                //
                 this.autoClicked = true;
                 this.pushedButton('red')
                 if (!this.warrior1Ready || !this.warrior2Ready) clearInterval(this.autoClicker)
@@ -844,7 +815,6 @@ export class GameWindowComponent implements OnInit {
             ( this.battleQueueStatus == QueueStatus.waitingForUser ||
             this.battleQueueStatus == QueueStatus.started ) || (!this.haveSeenEnd && this.gameOver)
           ) {
-            console.log('BattleAdvanced');
             this.advanceBattle();
           } else if (
             this.battleQueueStatus == QueueStatus.calculating
@@ -925,11 +895,11 @@ export class GameWindowComponent implements OnInit {
     document.getElementById('disabled-button2')?.setAttribute('disabled', '');
 
     // element1!.addEventListener('mouseover', function() {
-    //   console.log('Event triggered');
+    //
     // });
 
     // element2!.addEventListener('mouseover', function() {
-    //   console.log('Event triggered');
+    //
     // });
 
     // var event = new MouseEvent('mouseover', {
@@ -961,14 +931,14 @@ export class GameWindowComponent implements OnInit {
           if (this.loadingPercentage < 1) {
             let value = this.loadingPercentage;
             value = counterData.counterValue / counterData.counterMax;
-            console.log('value');
-            console.log(value);
+
+
             this.loadingPercentage = value;
           }
           this.loadingPercentage += 0.01;
         },
         error: (err: HttpErrorResponse) => {
-          console.error(err.status, err);
+
           if (this.warrior1Name && this.failoverCounter > count) {
             this.imageCounterClock(this.warrior1Name, count + 1);
           } else {
@@ -1006,8 +976,8 @@ export class GameWindowComponent implements OnInit {
 
   public drawLoadingTopScreen(name: string, warrior1: boolean = true): void {
     this.loadingbar = <HTMLDivElement>document.getElementById('child');
-    console.log('this.loadingbar');
-    console.log(this.loadingbar);
+
+
 
     if (!this.loadingbar)
       this.loadingbar = <HTMLDivElement>(
@@ -1088,7 +1058,7 @@ export class GameWindowComponent implements OnInit {
           }
         },
         error: (err: HttpErrorResponse) => {
-          console.error(err.status, err);
+
         },
         complete: () => {
           this.contestantService.changes.next(
@@ -1112,8 +1082,8 @@ export class GameWindowComponent implements OnInit {
         this.warrior2Stats = Stats2;
         this.warrior2Name = Stats2.name;
         this.warrior2Ready = false;
-        console.log('Contenstant 2');
-        console.log(Stats2.name);
+
+
         this.drawLoadingTopScreen(Stats2.name, false);
         // enemyName , enemyHpAmount , enemyMaxHp
         this.enemyName = Stats2.name;
@@ -1122,7 +1092,7 @@ export class GameWindowComponent implements OnInit {
         this.imageService.generateImageWithName(Stats2.name).subscribe({
           next: (image: Blob) => {
             this.warrior2ImageBlob = image;
-            console.log('Got Image!');
+
             createImageBitmap(image, 0, 0, 512, 512, {
               resizeWidth: 150,
               resizeHeight: 150,
@@ -1139,7 +1109,7 @@ export class GameWindowComponent implements OnInit {
                   .subscribe(() => {
                     // its void at backend so happens or not we continue
                     this.warrior2Ready = true;
-                    console.log('Drawing Image');
+
                     if (this.c) {
                       this.warrior2Called = false;
                       this.c.drawImage(this.bitmapCache2, 700, 60, this.warrior2Sprite.width, this.warrior2Sprite.height);
@@ -1168,7 +1138,7 @@ export class GameWindowComponent implements OnInit {
               this.bitmapCache2 = placeholderImage;
 
               this.warrior2Ready = true;
-              console.log('Drawing Image');
+
               if (this.c) {
                 this.warrior2Called = false;
                 this.c.drawImage(placeholderImage, 700, 60, this.warrior2Sprite.width, this.warrior2Sprite.height);
@@ -1219,8 +1189,8 @@ export class GameWindowComponent implements OnInit {
                *  We Start Creating Veggie
                */
               this.warrior1Stats = Stats;
-              console.log('Contenstant');
-              console.log(Stats.name);
+
+
               this.drawLoadingTopScreen(Stats.name);
               // enemyName , enemyHpAmount , enemyMaxHp
               this.heroName = Stats.name;
@@ -1229,7 +1199,7 @@ export class GameWindowComponent implements OnInit {
               this.imageService.generateImageWithName(Stats.name).subscribe({
                 next: (image: Blob) => {
                   this.warrior1ImageBlob = image;
-                  console.log('Got Image!');
+
                   createImageBitmap(image, 0, 0, 512, 512, {
                     resizeWidth: 250,
                     resizeHeight: 250,
@@ -1246,7 +1216,7 @@ export class GameWindowComponent implements OnInit {
                         .subscribe(() => {
                           // its void at backend so happens or not we continue
                           this.warrior1Ready = true;
-                          console.log('Drawing Image');
+
                           if (this.c) {
                             this.c.drawImage(this.bitmapCache, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
                             this.battleQueueStatus = QueueStatus.calculating;
@@ -1279,7 +1249,7 @@ export class GameWindowComponent implements OnInit {
                       .subscribe(() => {
                         // its void at backend so happens or not we continue
                         this.warrior1Ready = true;
-                        console.log('Drawing Image');
+
                         if (this.c) {
                           this.c.drawImage(placeholderImage, 200, 220, this.warrior1Sprite.width, this.warrior1Sprite.height);
                           this.battleQueueStatus = QueueStatus.calculating;
@@ -1423,7 +1393,7 @@ export class GameWindowComponent implements OnInit {
 
   /* MAIN ANIMATE CALL */
   public animateBattle(heroAttacking: boolean) {
-    console.log('ANIMATEBATTLE');
+
 
     this.renderCalled = true;
     this.heroAttacking = heroAttacking;

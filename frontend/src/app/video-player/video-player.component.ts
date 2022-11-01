@@ -23,7 +23,7 @@ export class VideoPlayerComponent implements OnInit {
     var video = document.getElementsByTagName('video')[0];
 
     if (this.kanyeWantsToSpeak) {
-      console.log("Kanyes turn")
+
     } else {
       if (video) {
         if (this.gameOver){
