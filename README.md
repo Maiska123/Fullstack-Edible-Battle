@@ -1,8 +1,9 @@
 # Fullstack Edible Battle
- Game based on Solidabis challenge about foods battling against each other based on nutrition values
+ Game based on Solidabis(Oy / Ltd / Plc) challenge about foods battling against each other based on nutrition values (more at docs/)
  <hr>
 
 ### QUICK NOTES
+> This game is a plain fiction and does'nt represent any of visual or written individuals. DeepAI is just a tool to generate pictures from adjective prefixed food-names from Fineli-API. Have fun - give credits and feedback etc. it's a hobby-project after all. **Cheers!**
 
 #### NOT A RELEASE OR READY FOR IT FOR A WHILE
 #### NO TESTS IMPLEMENTED FOR TIMELY REASONS (COULD'VE BUT GOT LIFE)
@@ -64,11 +65,14 @@ Tested in ![Google Chrome, hungry boi](https://img.shields.io/badge/Google_chrom
  - [ ] Give credit where credit is due (many websites and friends and solidabis (the company i guess) who inspired me & yeezy ofc
  - [ ] Create shortcuts to survival and twitch modes from "main screen"
  - [ ] That "main menu"
- - [ ] Lvl system based on attack + hp (maybe defence)
+ - [ ] Lvl system based on attack + hp (maybe §)
  - [ ] Mobile support
  - [ ] SAVE/LOAD game states through staticFiles (backend dotnet-thing)
  - [ ] Ingame Help (its so hard to push 1-button once or a little to activate autoclicker) BRUH
  - [ ] oh and last, better support for peasant/pleb browsers (other than chrome)
+ - [ ] defence =/= defense
+ - [ ] those dev-containers has some issues, they worked flawlessly at first but after production came to play something kinda broke
+ - [ ] CLEANING OMG THIS REPO IS UGLY MESS (sry)
 
 ## Description
 
