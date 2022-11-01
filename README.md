@@ -1,7 +1,24 @@
 # Fullstack Edible Battle
  Game based on Solidabis(Oy / Ltd / Plc) challenge about foods battling against each other based on nutrition values (more at docs/)
- <hr>
 
+ Table of Contents
+=================
+
+  * [Quick Notes](#quick-notes)
+    * [Remember autoclicker](#remember-autoclicker-to-rescue)
+    * [Why tho](#why-tho)
+  * [The Stack](#the-stack)
+  * [Todo](#todo)
+  * [Description](#description)
+  * [Installation](#installation)
+    * [Frontend](#frontend)
+    * [backend](#backend)
+  * [Usage](#usage)
+  * [Tests](#tests)
+  * [Credits](#credits)
+  * [License](#license)
+ <hr>
+ 
 ### QUICK NOTES
 > This game is a plain fiction and does'nt represent any of visual or written individuals. DeepAI is just a tool to generate pictures from adjective prefixed food-names from Fineli-API. Have fun - give credits and feedback etc. it's a hobby-project after all. **Cheers!**
 
@@ -26,13 +43,20 @@
       * dotnet run
 
 
-  #### Remember autoclicker to rescue :D (those 1 hp per attacks are cumbersome)
-   ![Autoclicker](docs/pics/autoclicker.jpg)
+#### Remember autoclicker to rescue  
+| Just press and hold FIGHT-button |
+|--|
+| ![Autoclicker](docs/pics/autoclicker.jpg) | 
+   
 ### Why tho
  It was fun experiment because always wanted to create games but haven't had motivating oppoturnities for it.
 
  <hr>
  
+## The stack
+
+
+
 | Frontend | Backend |
 |--|--|
 | ![Angular used here](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=gold) | ![.dotnet used here](https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=dotnet&logoColor=gold) |
@@ -50,7 +74,7 @@
 Developed with ![Ugh, who uses windows for programming](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 <hr>
 
-Tested in ![Google Chrome, hungry boi](https://img.shields.io/badge/Google_chrome-4285F4?style=for-the-badge&logo=Google-chrome&logoColor=white)
+Tested at ![Google Chrome, hungry boi](https://img.shields.io/badge/Google_chrome-4285F4?style=for-the-badge&logo=Google-chrome&logoColor=white)
 <hr>
 
 ###  TODO
@@ -79,16 +103,6 @@ Tested in ![Google Chrome, hungry boi](https://img.shields.io/badge/Google_chrom
 This project is based on a contest where two different foods fight against each other by "comparing" their nutritional values.
 
 *Task is given but the rest is pure passion.*
-
-## Table of Contents
-
--  [Installation](#installation)
-
--  [Usage](#usage)
-
--  [Credits](#credits)
-
--  [License](#license)
 
 ## Installation
 
