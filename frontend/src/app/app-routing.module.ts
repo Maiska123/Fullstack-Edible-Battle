@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
+  // i know this is ugly and not the proper way but dang - made whole thing in 3 weeks (excluding few days)
   { path: 'game', component: GameWindowComponent },
   { path: 'game/survival', component: GameWindowComponent },
   { path: 'game/twitch/survival', component: GameWindowComponent },
