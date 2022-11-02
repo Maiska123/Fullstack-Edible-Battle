@@ -363,10 +363,10 @@ export class GameWindowComponent implements OnInit {
   public evolveMyVeggie() {
     // this.warrior1ImageBlob = image;
     // let startX, startY, stopX, StopY;
-    if (this.clicked && this.warrior1Ready) {
+    if (this.clicked && this.warrior1Ready && this.warrior1EvolveStage < 4) {
       this.warrior1EvolveStage = this.warrior1EvolveStage + 1;
       if (this.warrior1EvolveStage == 3) this.disableEvolve();
-      if (this.warrior1EvolveStage <= 3) {
+      if (this.warrior1EvolveStage < 3) {
         createImageBitmap(
           this.warrior1ImageBlob,
           imagePosDescription[this.warrior1EvolveStage][0],
@@ -775,56 +775,57 @@ export class GameWindowComponent implements OnInit {
   public pushedButton(callbackName?: string) {
     switch (callbackName) {
       case 'red':
-        if (!this.clicked) {
-          // first time clicking
-          this.battleQueueStatus = QueueStatus.calculating;
+        if (!this.algorythmsMan || this.autoClicked) {
+          if (!this.clicked) {
+            // first time clicking
+            this.battleQueueStatus = QueueStatus.calculating;
 
-          this.addBattleStartClickHandler();
-          let word = `Started ${
-            this.adjectivesToStart[
-              Math.floor(Math.random() * this.adjectivesToStart.length) + 1
-            ]
-          } Battle...`;
-          // this.battleQueue.push({ state: BattleState.dialogTextInput, message: word });
-          setTimeout(() => {
-            this.dialogTextInput(word, false);
-            if (!this.warrior2Called) this.pushedButton('red');
-          }, 500);
-        } else {
-          // all the rest
-          this.mouseDown$.pipe(
-            delay(2000),
-            takeUntil(this.mouseUp$)
-          ).subscribe(res => {
-            //
+            this.addBattleStartClickHandler();
+            let word = `Started ${
+              this.adjectivesToStart[
+                Math.floor(Math.random() * this.adjectivesToStart.length) + 1
+              ]
+            } Battle...`;
+            // this.battleQueue.push({ state: BattleState.dialogTextInput, message: word });
+            setTimeout(() => {
+              this.dialogTextInput(word, false);
+              if (!this.warrior2Called) this.pushedButton('red');
+            }, 500);
+          } else {
+            // all the rest
+            this.mouseDown$.pipe(
+              delay(2000),
+              takeUntil(this.mouseUp$)
+            ).subscribe(res => {
+              //
 
-            if (this.warrior1Ready && this.warrior2Ready)
-            {
-              this.autoClicker = setInterval(()=>{
-                //
-                this.autoClicked = true;
-                this.pushedButton('red')
-                if (!this.warrior1Ready || !this.warrior2Ready) clearInterval(this.autoClicker)
-              },150);
-            }
-          });
-          if (!this.warrior2Ready && !this.warrior2Called && !this.warrior1Won) {
-            this.audioService.playOkSound();
-            this.addAnotherContestant();
-          } else if (
-            ( this.battleQueueStatus == QueueStatus.waitingForUser ||
-            this.battleQueueStatus == QueueStatus.started ) || (!this.haveSeenEnd && this.gameOver)
-          ) {
-            this.advanceBattle();
-          } else if (
-            this.battleQueueStatus == QueueStatus.calculating
-          ){
-            if (this.textCurrentlyRolling){
-              this.textCurrentlyRolling = false;
+              if (this.warrior1Ready && this.warrior2Ready)
+              {
+                this.autoClicker = setInterval(()=>{
+                  //
+                  this.autoClicked = true;
+                  this.pushedButton('red')
+                  if (!this.warrior1Ready || !this.warrior2Ready) clearInterval(this.autoClicker)
+                },150);
+              }
+            });
+            if (!this.warrior2Ready && !this.warrior2Called && !this.warrior1Won) {
+              this.audioService.playOkSound();
+              this.addAnotherContestant();
+            } else if (
+              ( this.battleQueueStatus == QueueStatus.waitingForUser ||
+              this.battleQueueStatus == QueueStatus.started ) || (!this.haveSeenEnd && this.gameOver)
+            ) {
+              this.advanceBattle();
+            } else if (
+              this.battleQueueStatus == QueueStatus.calculating
+            ){
+              if (this.textCurrentlyRolling){
+                this.textCurrentlyRolling = false;
+              }
             }
           }
         }
-
         break;
       case 'green':
         this.wannaBeAlgoExpert();
@@ -866,7 +867,7 @@ export class GameWindowComponent implements OnInit {
           document
             .getElementById('disabled-button1')
             ?.removeAttribute('disabled');
-          if (!(this.warrior1EvolveStage == 3))
+          if (!(this.warrior1EvolveStage >= 3))
             document
               .getElementById('disabled-button2')
               ?.removeAttribute('disabled');
