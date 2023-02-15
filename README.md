@@ -20,18 +20,17 @@
  <hr>
  
 ### QUICK NOTES
-> This game is a plain fiction and does'nt represent any of visual or written individuals. DeepAI is just a tool to generate pictures from adjective prefixed food-names from Fineli-API. Have fun - give credits and feedback etc. it's a hobby-project after all. **Cheers!**
+> This game is a plain fiction and doesn't represent any of visual or written individuals. DeepAI is just a tool to generate pictures from adjective prefixed food-names from Fineli-API. Have fun - give credits and feedback etc. it's a hobby-project after all. **Cheers!**
 
 #### NOT A RELEASE OR READY FOR IT FOR A WHILE
 #### NO TESTS IMPLEMENTED FOR TIMELY REASONS (COULD'VE BUT GOT LIFE)
 
-* You can play this game at
-  * https://veggiebattle.miskahannunkivi.fi/game
-    * want even better experience?
-      * [twitch-mode](https://veggiebattle.miskahannunkivi.fi/game/twitch)
-      * [survival-mode](https://veggiebattle.miskahannunkivi.fi/game/survival)
-      * [twitch-survival-mode](https://veggiebattle.miskahannunkivi.fi/game/twitch/survival)
-  * no authentication implemented yet - working on it.
+* You can play this game at *!! actually service down temporarily :( !!*
+  * ~https://veggiebattle.miskahannunkivi.fi/game~
+    * ~want even better experience?~
+      * ~[twitch-mode](https://veggiebattle.miskahannunkivi.fi/game/twitch)~
+      * ~[survival-mode](https://veggiebattle.miskahannunkivi.fi/game/survival)~
+      * ~[twitch-survival-mode](https://veggiebattle.miskahannunkivi.fi/game/twitch/survival)~
   * no mobile support - its just plain ugly. Working on it.
 * @Localhost
   * Docker
